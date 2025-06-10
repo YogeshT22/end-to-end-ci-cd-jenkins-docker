@@ -1,0 +1,10 @@
+# Data volumes from Docker Compose
+gitea-data/
+jenkins-data/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Python cache (if any)
+__pycache__/

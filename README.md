@@ -45,10 +45,10 @@ graph TD
         DockerSocket -- "7. Runs a new container" --> DeployedApp(Flask App Container);
     end
 
-    subgraph "User"
+    subgraph "EndUser"
         User(End User) -- "8. Accesses App" --> DeployedApp;
     end
-    ```
+    ``` 
 ```
 ## **How to Run This Platform**
 **Prerequisites:**

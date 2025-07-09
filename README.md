@@ -47,8 +47,7 @@ graph TD
 
     subgraph "EndUser"
         User(End User) -- "8. Accesses App" --> DeployedApp;
-    end
-    ``` 
+    end  
 ```
 ## **How to Run This Platform**
 **Prerequisites:**
@@ -88,13 +87,13 @@ Gitea (http://localhost:3000)
     - To stop all services and remove the containers and network:
     ``` bash 
     docker-compose down
-    ```
+	```
 
 To also delete all persistent data (Gitea repos, Jenkins jobs): 
 ``` bash 
 docker-compose down -v
 ```
 ---
-```
+
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

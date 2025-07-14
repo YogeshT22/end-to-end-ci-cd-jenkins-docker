@@ -1,8 +1,8 @@
 # Project: End-to-End CI/CD Pipeline Platform
 
-This repository contains the infrastructure-as-code for a complete, local CI/CD ecosystem built with Docker. It uses Docker Compose to orchestrate Gitea, Jenkins, and a private Docker Registry, creating a fully automated software delivery pipeline.
+This repository contains the infrastructure-as-code for a complete, local CI/CD ecosystem built with Docker. It uses Docker Compose to orchestrate **Gitea**, **Jenkins**, and a private **Docker Registry**, creating a fully automated software delivery pipeline.
 
-This platform is designed to continuously integrate, build, test, and deploy a sample application, which is hosted in a separate repository. The entire system demonstrates a real-world DevOps workflow, including automated triggers, artifact management, and solutions to common configuration and networking challenges.
+This platform is designed to continuously integrate, build, and deploy a sample application. The entire system demonstrates a real-world DevOps workflow, including automated triggers, artifact management, and solutions to common configuration and networking challenges.
 
 **Companion Application Repository:** [https://github.com/YogeshT22/sample-flask-app](https://github.com/YogeshT22/sample-flask-app)
 
@@ -10,22 +10,17 @@ This platform is designed to continuously integrate, build, test, and deploy a s
 
 ## Core Concepts & Skills Demonstrated
 
-* **CI/CD Pipeline Design:** Implemented a full, end-to-end pipeline covering all stages: Git Push -> Webhook Trigger -> Code Checkout -> Docker Build -> Push to Registry -> Deploy to "Production".
-* **Infrastructure as Code (IaC):** Defined the entire multi-service platform in a single `docker-compose.yml` file, making the environment completely reproducible and version-controlled.
-* **Service Orchestration:** Used Docker Compose to manage the lifecycle, networking, and data persistence for all services.
-* **Custom Tooling Environments:** Built a custom Jenkins image using a `Dockerfile` to bake in necessary dependencies (Git, Docker CLI), creating a stable and predictable build environment.
-* **Internal Networking & Service Discovery:** Configured a shared Docker network (`cicd-net`) to allow services to communicate reliably using their service names (e.g., `jenkins-server`, `gitea-server`).
-* **Artifact Management:** Deployed and used a private Docker Registry for storing and versioning the container images (artifacts) built by the pipeline.
-* **Complex Debugging & Problem Solving:**
-    * Solved container tool-chain issues (`docker: not found` in Jenkins) by creating a custom image.
-    * Resolved webhook security blocks (`403 Forbidden`, `Host Not Allowed`) by configuring Jenkins API tokens and Gitea's trusted host list.
-    * Fixed cross-platform networking issues between WSL2 and Windows to make the final deployed application accessible.
+*   **CI/CD Pipeline Design:** Implemented a full, end-to-end pipeline covering all stages: `Git Push` -> `Webhook Trigger` -> `Code Checkout` -> `Docker Build` -> `Push to Registry` -> `Deploy`.
+*   **Infrastructure as Code (IaC):** Defined the entire multi-service platform in a single `docker-compose.yml` file, making the environment completely reproducible and version-controlled.
+*   **Pipeline-as-Code:** Wrote a declarative `Jenkinsfile` to define the entire CI/CD process, ensuring the pipeline logic is version-controlled with the application code.
+*   **Custom Build Environments:** Built a custom Jenkins image using a `Dockerfile` to bake in necessary dependencies (Git, Docker CLI), creating a stable and predictable build environment.
+*   **Internal Networking & Service Discovery:** Configured a shared Docker network (`cicd-net`) to allow services to communicate reliably using their service names.
+*   **Artifact Management:** Deployed and used a private Docker Registry for storing and versioning the container images (artifacts) built by the pipeline.
+*   **Complex Debugging & Problem Solving:** Solved container tool-chain issues (`docker: not found`), resolved webhook security blocks (`403 Forbidden`, `Host Not Allowed`), and fixed cross-platform networking issues.
 
 ---
 
 ## Architecture Diagram
-
-This diagram illustrates the flow of information and actions within the CI/CD ecosystem.
 
 ```mermaid
 graph TD
@@ -33,66 +28,124 @@ graph TD
         Dev(Developer) -- "1. git push" --> Gitea[Gitea Server:3000];
     end
 
-    subgraph "Docker CI/CD Platform"
+    subgraph "Docker CI/CD Platform (Managed by Docker Compose)"
         Gitea -- "2. Webhook Trigger" --> Jenkins[Jenkins Server:8080];
         Jenkins -- "3. Checkout Code" --> Gitea;
-        Jenkins -- "4. Build Image" --> DockerSocket[(Docker Socket)];
+        Jenkins -- "4. Build Image" --> DockerSocket[(Host's Docker Socket)];
         Jenkins -- "5. Push Image" --> Registry[Local Registry:5000];
         Jenkins -- "6. Deploy Container" --> DockerSocket;
     end
 
     subgraph "Deployed Application"
-        DockerSocket -- "7. Runs a new container" --> DeployedApp(Flask App Container);
+        DockerSocket -- "7. Runs a new container" --> DeployedApp([Flask App Container]);
     end
 
-    subgraph "EndUser"
-        User(End User) -- "8. Accesses App" --> DeployedApp;
-    end  
+    subgraph "End User"
+        User(End User) -- "8. Accesses App @ localhost:8081" --> DeployedApp;
+    end
 ```
-## **How to Run This Platform**
-**Prerequisites:**
-
-- Docker Desktop with WSL2 integration enabled.
-- The sample application code pushed to a Gitea repository (see companion repo).
-    -(https://github.com/YogeshT22/sample-flask-app)
 ---
 
-- Step 1: Configure Insecure Registry in Docker
+## Getting Started: A Step-by-Step Guide
 
-    - Your Docker daemon must be configured to trust the local registry. In Docker Desktop, go to Settings -> Docker Engine and add the following to the JSON configuration, then apply and restart:
-    ```bash
-    "insecure-registries": [
-    "localhost:5000"
-    ]
-    ```
-- Step 2: Launch the Infrastructure
-    - This command will build the custom Jenkins image and start all services. The -d flag runs them in the background.
-    ```bash 
-    docker-compose up --build -d
-    ```
+This guide will walk you through setting up the entire platform from scratch.
 
-- Step 3: Initial Setup
-    - On the first run, you will need to perform the one-time setup for Gitea and Jenkins:
-Gitea (http://localhost:3000) 
-    - On the installation screen, set the Server Domain to gitea-server and the Base URL to http://gitea-server:3000/.
-    - Create an admin user.
-    - Create a repository for the sample application.
-    - Jenkins (http://localhost:8080): Unlock with the initial password from docker logs jenkins-server.
-    - Install suggested plugins, plus the Docker Pipeline plugin.
-    - Create an admin user.
-    - Navigate to Manage Jenkins -> System and set the Jenkins URL to http://jenkins-server:8080/.
-- Step 4: Configure the Pipeline
-    - Refer to the README.md in the companion application repository for instructions on creating the Jenkins pipeline job and configuring the webhook with an API token.
-- Step 5: Clean Up
-    - To stop all services and remove the containers and network:
-    ``` bash 
-    docker-compose down
-	```
+#### Part 1: Prerequisites
 
-To also delete all persistent data (Gitea repos, Jenkins jobs): 
-``` bash 
-docker-compose down -v
+* **WSL2**: Ensure you have WSL2 installed on your Windows machine with a Linux distribution (e.g., Ubuntu).
+* **Docker Desktop**: Install Docker Desktop and enable the WSL2 integration in Settings -> Resources -> WSL Integration.
+* **Clone Both Repositories**: Clone this repository (end-to-end-ci-cd-jenkins-docker) and its companion (sample-flask-app) into your WSL filesystem.
+
+```bash
+# Example:
+git clone https://github.com/YogeshT22/end-to-end-ci-cd-jenkins-docker.git
+git clone https://github.com/YogeshT22/sample-flask-app.git
 ```
+#### Part 2: One-Time Host Configuration
+
+1. Your Docker daemon must be configured to trust the local registry. This only needs to be done once.
+
+``Open Docker Desktop -> Settings -> Docker Engine.``
+
+2. Add the insecure-registries key to the JSON configuration:
+```bash
+"insecure-registries": [
+  "localhost:5000"
+]
+```
+3. Click "Apply & Restart".
+
+#### Part 3: Launch the Infrastructure
+
+Navigate into this project's directory (end-to-end-ci-cd-jenkins-docker) and launch all services.
+```bash
+# This builds the custom Jenkins image and starts all containers
+docker-compose up --build -d
+```
+
+Wait 2-3 minutes for all services to initialize before proceeding.
+
+#### Part 4: Gitea First-Time Setup
+
+1. Open your browser to http://localhost:3000.
+2. On the initial configuration page, it is critical to set the following:
+    - Database Type: SQLite3 (default is fine).
+    - Server Domain: gitea-server
+    - Gitea Base URL: http://gitea-server:3000/
+
+(This ensures Jenkins can find Gitea using its service name on the Docker network).
+
+3. Expand "Administrator Account Settings" and create your admin user.
+4. Click "Install Gitea" and log in.
+5. Create a new public repository named sample-flask-app.
+6. Follow the instructions on the Gitea page to push your local sample-flask-app code to this new repository.
+
+#### Part 5: Jenkins First-Time Setup
+
+1. Unlock Jenkins: Get the initial admin password from the logs:
+```bash
+docker logs jenkins-server
+```
+Go to http://localhost:8080, paste the password, and continue.
+
+2. Install Plugins: Select "Install suggested plugins". After the initial install, go to Manage Jenkins -> Plugins -> Available plugins, search for and install Docker Pipeline.
+3. Create Admin User: Create your admin user account.
+4. Set Jenkins URL: Go to Manage Jenkins -> System. In the Jenkins Location section, set the "Jenkins URL" to http://jenkins-server:8080/. Click Save.
+(This is crucial for webhook integrations to work correctly).
+5. Create Jenkins API Token:
+    - Click your username (top right) -> Configure.
+    - Go to the "API Token" section and click "Add new Token".
+    - Name it (e.g., gitea-webhook-token) and click Generate.
+    - **Copy the generated token immediately and save it.** You will not be shown it again.
+
+#### Part 6: Configure the CI/CD Pipeline
+
+1. Create the Jenkins Job:
+    - In Jenkins, click "New Item".
+    -  Name: flask-app-pipeline, select "Pipeline", and click OK.
+    - Scroll down to the "Pipeline" section and configure it as follows:
+        - Definition: Pipeline script from SCM
+        - SCM: Git
+        - Repository URL: http://gitea-server:3000/YOUR_GITEA_USERNAME/sample-flask-app.git
+        - Branch Specifier: */main
+    - Click Save.
+
+2. Configure the Gitea Webhook:
+    - In Gitea, go to your sample-flask-app repository -> Settings -> Webhooks.
+    - Click "Add Webhook" -> "Gitea".
+    - Target URL: Use the following format, embedding your Jenkins username and the API token you just generated. This authenticates the request and bypasses CSRF protection.
+    http://YOUR_JENKINS_USER:YOUR_API_TOKEN@jenkins-server:8080/job/flask-app-pipeline/build
+        - _Example: http://admin:11a22b33c44d55e66f77g88h99i@jenkins-server:8080/job/flask-app-pipeline/build_
+    
+    - Leave other settings as default and click "Add Webhook".
+
+#### Part 7: Testing the Pipeline
+You can now trigger the pipeline in two ways:
+1. Manually: In Jenkins, go to the flask-app-pipeline job and click "Build Now".
+2. Automatically: Make a code change in your local sample-flask-app, then git commit and git push it to Gitea. The pipeline should start within seconds.
+
+After a successful run, you can view your deployed application at http://localhost:8081.
+
 ---
 
 ## License

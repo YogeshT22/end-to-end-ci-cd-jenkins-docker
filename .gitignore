@@ -8,3 +8,9 @@ Thumbs.db
 
 # Python cache (if any)
 __pycache__/
+
+#Secure-files
+kubeconfig.yaml
+kubeconfig-*.yaml
+*.crt
+*.key

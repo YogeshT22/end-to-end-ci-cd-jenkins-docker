@@ -26,13 +26,19 @@ services:
 
   # 2. Jenkins - Our CI/CD Automation Server
   jenkins:
-    build: ./jenkins
+    build: jenkins/jenkins:lts-jdk11
     container_name: jenkins-server
     privileged: true
     user: root
     volumes:
       - jenkins-data:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
+      # Mount the kubectl binary from your WSL host into the container
+      - /usr/local/bin/kubectl:/usr/local/bin/kubectl
+      # Mount the trivy binary from your WSL host into the container
+      - /usr/local/bin/trivy:/usr/local/bin/trivy
+      # We also need to mount some of trivy's dependencies
+      - /usr/lib/x86_64-linux-gnu/libdevmapper.so.1.02:/usr/lib/x86_64-linux-gnu/libdevmapper.so.1.02
     ports:
       - "8080:8080" # Jenkins Web UI
       - "50000:50000" # Port for Jenkins agents

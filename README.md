@@ -2,7 +2,7 @@
 
 This repository contains the Infrastructure as Code for a complete, local DevOps ecosystem built with Docker. It showcases a full software lifecycle, from infrastructure provisioning with **Terraform**, to CI/CD with **Gitea** and **Jenkins**, to container orchestration with **Kubernetes (K3s)**.
 
-This platform is designed to automatically build, test, secure, and deploy a containerized application to Kubernetes. The entire system demonstrates a real-world, end-to-end DevOps workflow, including automated webhook triggers, artifact management, observability with **Prometheus & Grafana**, and DevSecOps with **Trivy**.
+This platform is designed to automatically build, test, secure, and deploy a containerized application to Kubernetes. The entire system demonstrates a real-world, end-to-end DevOps workflow, including automated webhook triggers, artifact management, observability with **Prometheus & Grafana**.
 
 **Companion Application Repository:** [https://github.com/YogeshT22/sample-flask-app](https://github.com/YogeshT22/sample-flask-app)
 
@@ -15,7 +15,6 @@ This platform is designed to automatically build, test, secure, and deploy a con
   - **Docker Compose:** Used for multi-service orchestration of the core CI/CD toolchain.
 - **CI/CD Pipeline Design:** Implemented a full, multi-stage pipeline: `Git Push` -> `Webhook` -> `Build` -> `Push to Registry` -> `Security Scan` -> `Deploy`.
 - **Container Orchestration:** Deployed and managed applications on a **Kubernetes (K3s)** cluster, using `Deployments`, `Services`, and `Ingress`.
-- **DevSecOps:** Integrated automated vulnerability scanning with **Trivy** into the pipeline, creating a "security gate" that prevents insecure images from being deployed.
 - **Observability & Monitoring:** Deployed **Prometheus** and **Grafana** using a **Helm** chart to collect and visualize real-time metrics from the Kubernetes cluster.
 - **Complex Debugging:** Systematically diagnosed and solved real-world issues across networking (Docker/WSL/Kubernetes), security (CSRF, TLS), and application configuration.
 - **Kubernetes Authentication:** Implemented a secure and professional authentication pattern by creating a dedicated **Kubernetes Service Account** for Jenkins, using its token to authenticate API requests from the CI/CD pipeline.

@@ -4,26 +4,28 @@ FROM jenkins/jenkins:lts-jdk11
 # Switch to the root user to install packages
 USER root
 
-# Install prerequisites
-RUN apt-get update && apt-get install -y ca-certificates curl gnupg
+# ---- INSTALL CORE DEPENDENCIES ----
+# Install git, curl, and other basics using apt-get
+RUN apt-get update && apt-get install -y git curl sudo
 
-# Add Docker's official GPG key
-RUN install -m 0755 -d /etc/apt/keyrings
-RUN curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-RUN chmod a+r /etc/apt/keyrings/docker.gpg
+# ---- INSTALL DOCKER CLI ----
+# Use the official Docker convenience script for a robust installation
+RUN curl -fsSL https://get.docker.com -o get-docker.sh
+RUN sh get-docker.sh
 
-# Set up the Docker repository
-RUN echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
-  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-  tee /etc/apt/sources.list.d/docker.list > /dev/null
+# ---- INSTALL KUBECTL ----
+# Download the specific binary and move it to a standard PATH location
+RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+RUN install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+RUN rm kubectl
 
-# Update package list again and install Docker and Git
-RUN apt-get update && apt-get install -y git docker-ce docker-ce-cli containerd.io
+# ---- INSTALL TRIVY ----
+# Download the specific binary and move it to a standard PATH location
+RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
 
-# Add the 'jenkins' user to the 'docker' group so it can run docker commands without sudo
-# This is a key step for cleaner pipeline scripts
+# ---- PERMISSIONS ----
+# Add the 'jenkins' user to the 'docker' group so it can use the Docker socket without sudo
 RUN usermod -aG docker jenkins
 
-# Switch back to the jenkins user
+# Switch back to the jenkins user for normal operation
 USER jenkins

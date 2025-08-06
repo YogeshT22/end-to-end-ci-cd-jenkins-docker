@@ -1,30 +1,32 @@
+# --------------------------------------
+# Docker Compose file for Gitea, Jenkins, and Local Docker Registry
+# Purpose: Set up a local CI/CD environment
+# Target: Local development using Docker
+# --------------------------------------
+
 version: "3.8"
 
-# Define a shared network for all our CI/CD services
 networks:
   cicd-net:
     driver: bridge
 
 services:
-  # 1. Gitea - Our self-hosted Git service
   gitea:
     image: gitea/gitea:latest
     container_name: gitea-server
     environment:
       - USER_UID=1000
       - USER_GID=1000
-      # Allow webhooks to be sent to any host on the internal Docker network
       - GITEA__webhook__ALLOWED_HOST_LIST=jenkins-server,172.20.0.0/16
     volumes:
       - gitea-data:/data
     ports:
-      - "3000:3000" # Gitea Web UI
-      - "222:22" # Gitea SSH
-    networks: # <-- This is a critical section
+      - "3000:3000"
+      - "222:22" # Dev Note: Gitea SSH
+    networks:
       - cicd-net
     restart: always
 
-  # 2. Jenkins - Our CI/CD Automation Server
   jenkins:
     build: jenkins/jenkins:lts-jdk11
     container_name: jenkins-server
@@ -33,30 +35,24 @@ services:
     volumes:
       - jenkins-data:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
-      # Mount the kubectl binary from your WSL host into the container
       - /usr/local/bin/kubectl:/usr/local/bin/kubectl
-      # Mount the trivy binary from your WSL host into the container
-      - /usr/local/bin/trivy:/usr/local/bin/trivy
-      # We also need to mount some of trivy's dependencies
-      - /usr/lib/x86_64-linux-gnu/libdevmapper.so.1.02:/usr/lib/x86_64-linux-gnu/libdevmapper.so.1.02
     ports:
-      - "8080:8080" # Jenkins Web UI
-      - "50000:50000" # Port for Jenkins agents
-    networks: # <-- This is a critical section
+      - "8080:8080"
+      - "50000:50000"
+    networks:
       - cicd-net
     restart: always
 
-  # 3. Docker Registry - Where we will store our built images
   registry:
     image: registry:2
     container_name: local-docker-registry
     ports:
       - "5000:5000"
-    networks: # <-- This is a critical section
+    networks:
       - cicd-net
     restart: always
 
-# Define the named volumes for data persistence
+# REMINDER: Define the named volumes for data persistence.
 volumes:
   gitea-data:
   jenkins-data:

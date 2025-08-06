@@ -1,37 +1,36 @@
-# This file overrides the default settings of the kube-prometheus-stack Helm chart
-# to make it leaner for our local k3d environment.
+# ----------------------------------------
+# Overrides for kube-prometheus-stack Helm chart
+# Target: Local development using k3d
+# Purpose: Reduce resource usage, simplify setup
+# ----------------------------------------
 
 # --- Global Settings ---
-# We don't need Alertmanager for this local setup.
+# Dev Note: We don't need Alertmanager for this local setup.
 alertmanager:
   enabled: false
 
-# --- Grafana Settings ---
 grafana:
-  # This makes the Grafana service of type NodePort, which is easier to access locally.
   service:
     type: NodePort
-    # Set a predictable NodePort so we don't have to look it up every time.
-    # Note: NodePorts must be in the range 30000-32767.
+
+    # Dev Note: NodePorts must be in the range 30000-32767.
     nodePort: 30900
-  # Set the default admin password so we don't have to get it from a secret.
+
+  # WARNING: it is a Hardcoded admin password for local use only. Never use in production.
   adminPassword: "admin"
 
-# --- Prometheus Settings ---
 prometheus:
   prometheusSpec:
-    # Reduce the default requested resources to fit in our small k3d nodes.
+    # Dev Note: Reduce resource usage for local testing.
     resources:
       requests:
         cpu: 100m
         memory: 256Mi
-    # Keep data for a shorter period to save space.
+
     retention: 5d
-    # Disable remote write, as we're not sending data anywhere.
+    # Dev Note: Disable long-term storage for local testing.
     remoteWrite: []
 
-# --- Other Component Settings ---
-# Reduce resources for other components as well.
 kube-state-metrics:
   resources:
     requests:

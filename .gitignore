@@ -14,3 +14,15 @@ kubeconfig.yaml
 kubeconfig-*.yaml
 *.crt
 *.key
+
+
+.terraform/
+*.tfstate
+*.tfstate.backup
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc

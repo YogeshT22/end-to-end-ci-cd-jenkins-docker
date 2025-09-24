@@ -278,6 +278,7 @@ helm install prometheus-stack prometheus-community/kube-prometheus-stack -n moni
 
 ```
 
+- Grafana accessible at `http://localhost:30900` (user/admin).
 - _(Refer to helm-configs/prometheus-values.yaml for custom configuration.)_
 
 ---

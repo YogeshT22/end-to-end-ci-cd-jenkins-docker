@@ -1,4 +1,5 @@
 # Project: End-to-End CI/CD Pipeline Platform with Kubernetes
+### FINAL PROJECT VERSION: V1 - OCT 08, 2025
 
 This repository contains the Infrastructure as Code for a complete, local DevOps ecosystem built with Docker. It showcases a full software lifecycle, from infrastructure provisioning with **Terraform**, to CI/CD with **Gitea** and **Jenkins**, to container orchestration with **Kubernetes (K3s)**.
 
@@ -81,7 +82,7 @@ mirrors:
 
 ```bash
 # Create the registries.yaml file as described in the project
-k3d cluster create devops-cluster -p "8081:80@loadbalancer" --network big-project-2-cicd-pipeline_cicd-net --registry-config registries.yaml
+k3d cluster create devops-cluster -p "8082:80@loadbalancer" --network big-project-2-cicd-pipeline_cicd-net --registry-config registries.yaml
 ```
 
 ---
@@ -90,14 +91,15 @@ k3d cluster create devops-cluster -p "8081:80@loadbalancer" --network big-projec
 
 Perform the initial setup for Gitea (setting domain to gitea-server) and Jenkins (unlocking, installing plugins, setting URL to <http://jenkins-server:8080/>, and creating an API token).
 
-1. Open your browser to <http://localhost:3000>.
-2. On the initial configuration page, it is critical to set the following: - Database Type: SQLite3 (default is fine). - Server Domain: gitea-server - Gitea Base URL: <http://gitea-server:3000/>
+1. Open your browser to <http://localhost:8081>.
+2. On the initial configuration page, it is critical to set the following: - Database Type: SQLite3 (default is fine). - Server Domain: gitea-server - Gitea Base URL: <http://gitea-server:8081/>
    (This ensures Jenkins can find Gitea using its service name on the Docker network).
 
 3. Expand "Administrator Account Settings" and create your admin user.
 4. Click "Install Gitea" and log in.
 5. Create a new public repository named sample-flask-app.
 6. Follow the instructions on the Gitea page to push your local sample-flask-app code to this new repository.
+_creating new remote like git remote add gitea http://admin:admin@localhost:8081/admin/sample-flask-app.git works!_
 
 ---
 
@@ -133,11 +135,12 @@ Before creating the Jenkins job, you must provide Jenkins with the credentials t
    kubectl apply -f /path/to/sample-flask-app/k8s/service-account.yaml
    kubectl apply -f /path/to/sample-flask-app/k8s/jenkins-token-secret.yaml
    ```
+**_skip below to STEP 4CC to create then comeback and do 2nd and 3rd step below!_**
 
 2. **Generate a custom `kubeconfig-jenkins.yaml` file.** This involves getting your cluster's dynamic port, gateway IP, CA certificate, and the Service Account Token.
 3. **Upload this `kubeconfig-jenkins.yaml` file** to Jenkins as a "Secret file" credential with the ID `kubeconfig-sa`.
 
-### Step 4d: Creating custom Kubeconfig-jenkins.yaml file
+### Step 4cc: Creating custom Kubeconfig-jenkins.yaml file
 
 #### Guide: How to Create the kubeconfig-jenkins.yaml File
 
@@ -164,7 +167,6 @@ The output will be something like 0.0.0.0:34541. Note down the port number (e.g.
 - This is the stable IP address of your host machine from the perspective of the Jenkins container.
 
 ```bash
-
 docker network inspect big-project-2-cicd-pipeline_cicd-net --format '{{(index .IPAM.Config 0).Gateway}}'
 ```
 
@@ -281,6 +283,11 @@ helm install prometheus-stack prometheus-community/kube-prometheus-stack -n moni
 - Grafana accessible at `http://localhost:30900` (user/admin).
 - _(Refer to helm-configs/prometheus-values.yaml for custom configuration.)_
 
+- ***(important) Run this command to dynamically add the port mapping:***
+```bash
+k3d cluster edit devops-cluster --port-add 30900:30900@loadbalancer
+```
+
 ---
 
 ### Step 7: Testing the Pipeline
@@ -312,6 +319,7 @@ This directory demonstrates the core workflow for infrastructure provisioning us
 - **Directory:** `terraform-local-docker/`
 
 ---
+
 
 ## License
 

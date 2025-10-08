@@ -21,21 +21,21 @@ services:
     volumes:
       - gitea-data:/data
     ports:
-      - "3000:3000"
+      - "8081:3000"
       - "222:22" # Dev Note: Gitea SSH
     networks:
       - cicd-net
     restart: always
 
   jenkins:
-    build: jenkins/jenkins:lts-jdk11
+    build: ./jenkins
     container_name: jenkins-server
     privileged: true
     user: root
     volumes:
       - jenkins-data:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
-      - /usr/local/bin/kubectl:/usr/local/bin/kubectl
+      #- /usr/local/bin/kubectl:/usr/local/bin/kubectl
     ports:
       - "8080:8080"
       - "50000:50000"

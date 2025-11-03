@@ -297,7 +297,7 @@ You can now trigger the pipeline in two ways:
 1. Manually: In Jenkins, go to the `flask-app-pipeline job` and click "Build Now".
 2. Automatically: Make a code change in your local sample-flask-app, then git commit and git push it to Gitea. The pipeline should start within seconds.
 
-After a successful run, you can view your deployed application at <http://localhost:8081>.
+After a successful run, you can view your deployed application at <http://localhost:8082>.
 
 ---
 

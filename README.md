@@ -24,7 +24,7 @@ This platform is designed to automatically build, test, secure, and deploy a con
 
 ## Architecture Diagram
 
-![Architecture-diagram](src/arch-diagram1.png)
+![Architecture-diagram](assets/arch-diagram1.png)
 
 ---
 

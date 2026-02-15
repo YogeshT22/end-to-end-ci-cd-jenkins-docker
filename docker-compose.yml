@@ -28,14 +28,18 @@ services:
     restart: always
 
   jenkins:
-    build: ./jenkins
+    build:
+      context: ./jenkins
+      dockerfile: dockerfile
     container_name: jenkins-server
     privileged: true
     user: root
     volumes:
       - jenkins-data:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
+      #- /usr/bin/docker:/usr/bin/docker
       #- /usr/local/bin/kubectl:/usr/local/bin/kubectl
+      #- /usr/local/bin/trivy:/usr/local/bin/trivy
     ports:
       - "8080:8080"
       - "50000:50000"
@@ -52,7 +56,20 @@ services:
       - cicd-net
     restart: always
 
+  # Dev Note: Ollama service for AI Agent integration in CI/CD pipeline.
+  ollama:
+    image: alpine/ollama:latest # using alpine based for smaller size and faster startup.
+    container_name: ollama-server
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - cicd-net
+    restart: always
+
 # REMINDER: Define the named volumes for data persistence.
 volumes:
   gitea-data:
   jenkins-data:
+  ollama-data:

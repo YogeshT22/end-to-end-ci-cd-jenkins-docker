@@ -1,26 +1,47 @@
-# --------------------------------------
-# Dockerfile for Jenkins with Docker and kubectl
-# Purpose: Set up Jenkins with Docker and kubectl for CI/CD
-# Target: Local development using k3d
-# --------------------------------------
-
-
-FROM jenkins/jenkins:lts-jdk11
+FROM jenkins/jenkins:lts-jdk17
 
 USER root
 
-RUN apt-get update && apt-get install -y git curl sudo
+# basic tools
+RUN apt-get update && apt-get install -y \
+  git \
+  curl \
+  sudo \
+  wget \
+  apt-transport-https \
+  ca-certificates \
+  gnupg \
+  lsb-release \
+  gpg \
+  tar \
+  gzip
 
-RUN curl -fsSL https://get.docker.com -o get-docker.sh
-RUN sh get-docker.sh
+# Install cosign v2.4.1
+RUN wget https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign-linux-amd64 \
+  -O /usr/local/bin/cosign \
+  && chmod +x /usr/local/bin/cosign
 
-RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+# install docker CLI
+RUN curl -fsSL https://get.docker.com | sh
+
+# install kubectl
+RUN curl -LO https://dl.k8s.io/release/v1.30.6/bin/linux/amd64/kubectl
 RUN install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 RUN rm kubectl
 
-# Dev Note: removed Trivy security scanner feature, due to buggy behavior with jenkins.
-# Dev Note: Add the 'jenkins' user to the 'docker' group so it can use the Docker socket without sudo
+RUN apt-get update && apt-get install -y kubectl
+
+# install trivy (binary method)
+RUN curl -sfL https://github.com/aquasecurity/trivy/releases/download/v0.56.2/trivy_0.56.2_Linux-64bit.tar.gz -o trivy.tar.gz
+
+RUN tar -xzf trivy.tar.gz
+
+RUN install -o root -g root -m 0755 trivy /usr/local/bin/trivy
+
+RUN rm trivy trivy.tar.gz LICENSE README.md
+
+# allow jenkins user to use docker
 RUN usermod -aG docker jenkins
 
-# Dev Note: Switches back to the jenkins user for normal operation.
+
 USER jenkins

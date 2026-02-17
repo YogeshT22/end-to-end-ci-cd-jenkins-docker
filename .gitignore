@@ -1,21 +1,24 @@
 # Data volumes from Docker Compose
 gitea-data/
 jenkins-data/
+registry-data/
 
-# System files
-.DS_Store
-Thumbs.db
-
-# Python cache (if any)
-__pycache__/
-
-#Secure-files
-kubeconfig.yaml
-kubeconfig-*.yaml
+# Certificates and keys
+certs/
+*.pem
 *.crt
 *.key
+*.p12
+*.pfx
 
+# Cosign
+cosign.key
 
+# Kubernetes configs
+kubeconfig.yaml
+kubeconfig-*.yaml
+
+# Terraform
 .terraform/
 *.tfstate
 *.tfstate.backup
@@ -27,5 +30,13 @@ override.tf.json
 .terraformrc
 terraform.rc
 
-#cosign
-cosign.key
+# Environment files
+.env
+.env.*
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Python cache
+__pycache__/

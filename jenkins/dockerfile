@@ -2,43 +2,34 @@ FROM jenkins/jenkins:lts-jdk17
 
 USER root
 
-# basic tools
+# Basic tools
 RUN apt-get update && apt-get install -y \
-  git \
-  curl \
-  sudo \
-  wget \
-  apt-transport-https \
-  ca-certificates \
-  gnupg \
-  lsb-release \
-  gpg \
-  tar \
-  gzip
+  git curl sudo wget apt-transport-https \
+  ca-certificates gnupg lsb-release gpg tar gzip
+
+# ---- TRUST FIX: Explicitly add mkcert Root CA ----
+# We use the COPY command so the cert is baked into the image
+COPY certs/rootCA.crt /usr/local/share/ca-certificates/mkcert-root-ca.crt
+RUN chmod 644 /usr/local/share/ca-certificates/mkcert-root-ca.crt && \
+  update-ca-certificates
 
 # Install cosign v2.4.1
 RUN wget https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign-linux-amd64 \
-  -O /usr/local/bin/cosign \
-  && chmod +x /usr/local/bin/cosign
+  -O /usr/local/bin/cosign && chmod +x /usr/local/bin/cosign
 
-# install docker CLI
+# Install Docker CLI
 RUN curl -fsSL https://get.docker.com | sh
 
-# install kubectl
-RUN curl -LO https://dl.k8s.io/release/v1.30.6/bin/linux/amd64/kubectl
-RUN install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-RUN rm kubectl
+# Install kubectl
+RUN curl -LO https://dl.k8s.io/release/v1.30.6/bin/linux/amd64/kubectl && \
+  install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && \
+  rm kubectl
 
-RUN apt-get update && apt-get install -y kubectl
-
-# install trivy (binary method)
-RUN curl -sfL https://github.com/aquasecurity/trivy/releases/download/v0.56.2/trivy_0.56.2_Linux-64bit.tar.gz -o trivy.tar.gz
-
-RUN tar -xzf trivy.tar.gz
-
-RUN install -o root -g root -m 0755 trivy /usr/local/bin/trivy
-
-RUN rm trivy trivy.tar.gz LICENSE README.md
+# Install Trivy
+RUN curl -sfL https://github.com/aquasecurity/trivy/releases/download/v0.56.2/trivy_0.56.2_Linux-64bit.tar.gz -o trivy.tar.gz && \
+  tar -xzf trivy.tar.gz && \
+  install -o root -g root -m 0755 trivy /usr/local/bin/trivy && \
+  rm trivy trivy.tar.gz
 
 # allow jenkins user to use docker
 RUN usermod -aG docker jenkins

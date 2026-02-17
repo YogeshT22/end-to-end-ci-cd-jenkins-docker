@@ -4,11 +4,10 @@
 # Target: Local development using Docker
 # --------------------------------------
 
-version: "3.8"
-
 networks:
   cicd-net:
-    driver: bridge
+    external: true
+    name: big-project-2-cicd-pipeline_cicd-net
 
 services:
   gitea:
@@ -17,7 +16,7 @@ services:
     environment:
       - USER_UID=1000
       - USER_GID=1000
-      - GITEA__webhook__ALLOWED_HOST_LIST=jenkins-server,172.20.0.0/16
+      - GITEA__webhook__ALLOWED_HOST_LIST=jenkins-server,loopback,private
     volumes:
       - gitea-data:/data
     ports:
@@ -29,14 +28,19 @@ services:
 
   jenkins:
     build:
-      context: ./jenkins
-      dockerfile: dockerfile
+      context: .
+      dockerfile: jenkins/Dockerfile
     container_name: jenkins-server
     privileged: true
     user: root
+    # Add a custom environment variable for a CASC config (future use, but good structure)
+    environment:
+      - CASC_JENKINS_CONFIG=/var/jenkins_home/casc.yaml
     volumes:
       - jenkins-data:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
+      # # TRUST FIX: Mount the Root CA directly into Jenkins' trusted store
+      # - ./certs/rootCA.pem:/usr/local/share/ca-certificates/my-root-ca.crt
       #- /usr/bin/docker:/usr/bin/docker
       #- /usr/local/bin/kubectl:/usr/local/bin/kubectl
       #- /usr/local/bin/trivy:/usr/local/bin/trivy
@@ -50,20 +54,16 @@ services:
   registry:
     image: registry:2
     container_name: local-docker-registry
+    environment:
+      # NATIVE TLS CONFIGURATION FOR THE REGISTRY
+      - REGISTRY_HTTP_ADDR=0.0.0.0:5000
+      - REGISTRY_HTTP_TLS_CERTIFICATE=/certs/local-docker-registry.pem
+      - REGISTRY_HTTP_TLS_KEY=/certs/local-docker-registry-key.pem
+    volumes:
+      - ./certs:/certs:ro # Mount the certs read-only
+      - registry-data:/var/lib/registry # Persist registry data
     ports:
       - "5000:5000"
-    networks:
-      - cicd-net
-    restart: always
-
-  # Dev Note: Ollama service for AI Agent integration in CI/CD pipeline.
-  ollama:
-    image: alpine/ollama:latest # using alpine based for smaller size and faster startup.
-    container_name: ollama-server
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama-data:/root/.ollama
     networks:
       - cicd-net
     restart: always
@@ -72,4 +72,4 @@ services:
 volumes:
   gitea-data:
   jenkins-data:
-  ollama-data:
+  registry-data:

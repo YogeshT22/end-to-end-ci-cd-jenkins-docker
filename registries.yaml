@@ -1,4 +1,9 @@
 mirrors:
-  "localhost:5000":
+  "local-docker-registry:5000":
     endpoint:
-      - http://registry:5000
+      - "https://local-docker-registry:5000"
+
+configs:
+  "local-docker-registry:5000":
+    tls:
+      ca_file: /usr/local/share/ca-certificates/my-root-ca.crt

@@ -1,4 +1,32 @@
+![Platform](https://img.shields.io/badge/Platform-Kubernetes-blue)
+![CI/CD](https://img.shields.io/badge/CI/CD-Jenkins-red)
+![Security](https://img.shields.io/badge/Security-Cosign-green)
+![Monitoring](https://img.shields.io/badge/Monitoring-Prometheus-orange)
+![Automation](https://img.shields.io/badge/Automation-Bash-yellow)
+
 # Project: Production-Grade DevSecOps Platform, AWS Ready.
+
+## One-Command Automated DevSecOps Platform
+
+This project implements a fully automated, production-style DevSecOps platform that provisions infrastructure, configures Kubernetes, deploys monitoring, and verifies system health using a single bootstrap command.
+
+```bash
+./bootstrap.sh
+```
+
+This platform demonstrates real-world DevOps engineering practices including:
+
+- Infrastructure automation
+- Kubernetes cluster lifecycle management
+- Secure software supply chain (Trivy, SBOM, Cosign)
+- Private TLS container registry
+- CI/CD pipeline automation with Jenkins
+- Monitoring and observability using Prometheus and Grafana
+- Idempotent bootstrap architecture
+
+The entire environment can be provisioned, stopped, and restarted safely using automation scripts.
+
+### Demo Video: _will be added soon_
 
 # Project Overview
 
@@ -35,47 +63,46 @@
 5. Kubernetes pulls image using local registry
 6. Kubernetes deploys.
 
+## Lessons Learned
+
+This project was an intensive exercise in system integration and debugging. Key takeaways include:
+*   **Immutability of Infrastructure:** When a local cluster becomes "poisoned" with bad networking or security configs, it is faster and more reliable to delete and recreate it than to patch it.
+*   **Explicit Trust is Mandatory:** In a private, secure environment, "automatic" trust doesn't exist. Every communication hop (Jenkins -> Registry -> K8s) requires explicit certificate injection and verification.
+*   **Pathing and Quoting in WSL:** Windows file paths with spaces require strict quoting to prevent tools like `k3s` from failing to find volumes.
 
 ## Table of Contents
 
 - [Project Overview](#project-overview)
-
-- [Secure Software Supply Chain Flow of V2](#secure-software-supply-chain-flow-of-v2)
-- [Supply Chain Flow of V1](#supply-chain-flow-of-v1)
+  - [Secure Software Supply Chain Flow of V2](#secure-software-supply-chain-flow-of-v2)
+  - [Supply Chain Flow of V1](#supply-chain-flow-of-v1)
+  - [Lessons Learned](#lessons-learned)
 
 - [About Repository](#about-repository)
+  - [Core Concepts and Skills Demonstrated](#core-concepts--skills-demonstrated)
+  - [Architecture Diagram](#architecture-diagram)
+  - [End-to-End Trust Architecture](#end-to-end-trust-architecture)
+  - [Component Responsibilities](#component-responsibilities)
+  - [Network Architecture](#network-architecture)
+  - [Private Registry Security](#private-registry-security)
+  - [Immutable Deployment Strategy](#immutable-deployment-strategy)
 
-- [Core Concepts and Skills Demonstrated](#core-concepts--skills-demonstrated)
+- [Quick Start (Automated Setup - Recommended)](#quick-start-automated-setup---recommended)
+  - [Automation Scripts Overview](#automation-scripts-overview)
+  - [Automated Provisioning Architecture](#automated-provisioning-architecture)
 
-- [Architecture Diagram](#architecture-diagram)
-
-- [End-to-End Trust Architecture](#end-to-end-trust-architecture)
-
-- [Component Responsibilities](#component-responsibilities)
-
-- [Network Architecture](#network-architecture)
-
-- [Private Registry Security](#private-registry-security)
-
-- [Immutable Deployment Strategy](#immutable-deployment-strategy)
-
-- [How to Run This Platform](#how-to-run-this-platform)
-
+- [Manual Setup (Advanced / Educational)](#manual-setup-advanced--educational)
   - [Prerequisites](#prerequisites)
   - [Step 1: Launch Core Infrastructure](#step-1-launch-the-core-infrastructure)
   - [Step 2: Create Kubernetes Cluster](#step-2-create-the-kubernetes-cluster)
   - [Step 3: One-Time Service Setup Gitea](#step-3-one-time-service-setup-gitea)
   - [Step 4: Jenkins First-Time Setup](#step-4-jenkins-first-time-setup)
   - [Step 5: Create and Configure Kubernetes Credentials](#step-5-create-and-configure-kubernetes-credentials)
-  - [Step 6: Creating custom Kubeconfig-jenkins.yaml file](#step-6-creating-custom-kubeconfig-jenkinsyaml-file)
+  - [Step 6: Creating custom Kubeconfig](#step-6-creating-custom-kubeconfig-jenkinsyaml-file)
   - [Step 7: Configure the CI/CD Pipeline](#step-7-configure-the-cicd-pipeline)
   - [Step 8: Deploy the Monitoring Stack](#step-8-deploy-the-monitoring-stack)
   - [Step 9: Testing the Pipeline](#step-9-testing-the-pipeline)
 
-- [Lessons Learned](#lessons-learned)
-
 - [Appendix A: Standalone Terraform Demonstration](#appendix-a-standalone-terraform-demonstration)
-
 - [License](#license)
 
 
@@ -210,7 +237,112 @@ This prevents:
 - tag overwrite attacks
 - inconsistent deployments
 
-## How to Run This Platform
+## Quick Start (Automated Setup - Recommended)
+
+This platform can be fully provisioned using a single command. The bootstrap system automatically creates the infrastructure, configures Kubernetes, deploys monitoring, and verifies platform health.
+
+### Step 1: Clone the repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/big-project-2-cicd-pipeline.git
+cd big-project-2-cicd-pipeline
+```
+
+### Step 2: Run the bootstrap script
+
+```bash
+chmod +x bootstrap.sh
+./bootstrap.sh
+```
+
+This script will automatically:
+
+* Start Docker infrastructure (Gitea, Jenkins, Private Registry)
+* Wait for all services to become ready
+* Create or recover the Kubernetes cluster
+* Configure Kubernetes credentials for CI/CD
+* Deploy Prometheus and Grafana monitoring stack
+* Verify full platform health and connectivity
+
+No manual setup steps are required.
+
+---
+
+### Platform Access URLs
+
+After successful bootstrap, access the services:
+
+| Service     | URL                                              |
+| ----------- | ------------------------------------------------ |
+| Gitea       | [http://localhost:8081](http://localhost:8081)   |
+| Jenkins     | [http://localhost:8080](http://localhost:8080)   |
+| Grafana     | [http://localhost:30900](http://localhost:30900) |
+| Application | [http://localhost:8082](http://localhost:8082)   |
+
+---
+
+### Stop the Platform Safely
+
+To stop all infrastructure without deleting data:
+
+```bash
+./stop-platform.sh
+```
+
+This safely stops:
+
+* Kubernetes cluster
+* Docker containers
+
+All data, registry images, and configurations are preserved.
+
+---
+
+## Automation Scripts Overview
+
+The platform uses modular, production-style infrastructure automation scripts located in the `scripts/` directory.
+
+Each script has a single responsibility and is safe to rerun (idempotent).
+
+| Script                     | Purpose                                              |
+| -------------------------- | ---------------------------------------------------- |
+| 01-start-infrastructure.sh | Starts Docker services                               |
+| 02-wait-for-services.sh    | Waits until Gitea, Jenkins, and Registry are ready   |
+| 03-create-cluster.sh       | Creates or recovers Kubernetes cluster               |
+| 04-configure-kubernetes.sh | Configures Kubernetes service account and kubeconfig |
+| 05-deploy-monitoring.sh    | Deploys Prometheus and Grafana using Helm            |
+| 06-verify-platform.sh      | Verifies full platform functionality                 |
+| stop-platform.sh           | Safely stops platform infrastructure                 |
+| bootstrap.sh               | Orchestrates full platform provisioning              |
+
+---
+
+## Automated Provisioning Architecture
+
+The platform follows a production-grade bootstrap model:
+
+1. Infrastructure startup
+2. Service readiness verification
+3. Kubernetes cluster provisioning
+4. Trust and credential configuration
+5. Monitoring deployment
+6. Platform verification
+
+This ensures the platform is:
+
+* Fully reproducible
+* Safe to rerun
+* Resistant to partial failures
+* Suitable for real DevOps workflows
+
+---
+
+## Manual Setup (Advanced / Educational)
+
+Manual setup instructions are provided below for educational purposes and to demonstrate the underlying infrastructure configuration process.
+
+For normal usage, the automated bootstrap method is recommended.
+
 
 **Prerequisites:**
 
@@ -292,7 +424,6 @@ Perform the initial setup for Gitea.
 
 ```bash
 docker logs jenkins-server
-
 ```
 
 1. Go to `http://localhost:8080`, paste the password, and continue.
@@ -459,10 +590,6 @@ helm install prometheus-stack prometheus-community/kube-prometheus-stack -n moni
 - Grafana accessible at `http://localhost:30900` (user/admin).
 - _(Refer to helm-configs/prometheus-values.yaml for custom configuration.)_
 
-- ***(important) Run this command to dynamically add the port mapping:***
-```bash
-k3d cluster edit devops-cluster --port-add 30900:30900@loadbalancer
-```
 
 ---
 
@@ -475,15 +602,6 @@ You can now trigger the pipeline in two ways:
 
 After a successful run, you can view your deployed application at `<http://localhost:8082>`.
 
-
-## Lessons Learned
-
-This project was an intensive exercise in system integration and debugging. Key takeaways include:
-*   **Immutability of Infrastructure:** When a local cluster becomes "poisoned" with bad networking or security configs, it is faster and more reliable to delete and recreate it than to patch it.
-*   **Explicit Trust is Mandatory:** In a private, secure environment, "automatic" trust doesn't exist. Every communication hop (Jenkins -> Registry -> K8s) requires explicit certificate injection and verification.
-*   **Pathing and Quoting in WSL:** Windows file paths with spaces require strict quoting to prevent tools like `k3s` from failing to find volumes.
-
----
 
 ### Appendix A: Standalone Terraform Demonstration
 

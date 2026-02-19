@@ -34,6 +34,26 @@ helm repo update >/dev/null
 
 echo "[OK] Helm repo ready"
 
+echo "[INFO] Waiting for CoreDNS readiness..."
+
+kubectl wait \
+  --namespace kube-system \
+  --for=condition=ready pod \
+  -l k8s-app=kube-dns \
+  --timeout=120s
+
+echo "[OK] CoreDNS ready"
+
+echo "[INFO] Testing DNS resolution inside cluster..."
+
+kubectl run dns-test \
+  --image=busybox:1.36 \
+  --rm -it \
+  --restart=Never \
+  -- nslookup github.com >/dev/null
+
+echo "[OK] DNS resolution working"
+
 echo "[INFO] Checking if monitoring already installed..."
 
 if helm list -n "$NAMESPACE" | grep -q "$RELEASE_NAME"; then
@@ -41,7 +61,7 @@ if helm list -n "$NAMESPACE" | grep -q "$RELEASE_NAME"; then
 else
     echo "[INFO] Installing monitoring stack..."
 
-    helm install "$RELEASE_NAME" prometheus-community/kube-prometheus-stack \
+    helm upgrade --install "$RELEASE_NAME" prometheus-community/kube-prometheus-stack \
         -n "$NAMESPACE" \
         -f "$VALUES_FILE"
 

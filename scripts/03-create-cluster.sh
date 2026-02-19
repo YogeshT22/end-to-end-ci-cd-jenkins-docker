@@ -81,6 +81,8 @@ k3d cluster create "$CLUSTER_NAME" \
   --network "$NETWORK_NAME" \
   --registry-config "$REGISTRY_CONFIG" \
   --volume "$CERT_PATH:/usr/local/share/ca-certificates/my-root-ca.crt@server:*" \
-  --volume "$CERT_PATH:/usr/local/share/ca-certificates/my-root-ca.crt@agent:*"
+  --volume "$CERT_PATH:/usr/local/share/ca-certificates/my-root-ca.crt@agent:*" \
+  --k3s-arg "--resolv-conf=/etc/resolv.conf@server:*" \
+  --k3s-arg "--resolv-conf=/etc/resolv.conf@agent:*"
 
 echo "[SUCCESS] Cluster created"

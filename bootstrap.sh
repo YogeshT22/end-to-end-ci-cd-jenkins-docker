@@ -8,6 +8,15 @@ echo "========================================"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+echo "[INFO] Checking internet connectivity..."
+
+if ! curl -s https://github.com >/dev/null; then
+    echo "[ERROR] No internet connectivity detected. Fix network before running bootstrap."
+    exit 1
+fi
+
+echo "[OK] Internet connectivity verified"
+
 run_step() {
 
     local script="$1"

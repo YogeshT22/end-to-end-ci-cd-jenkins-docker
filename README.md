@@ -8,15 +8,31 @@
 
 ## One-Command Automated DevSecOps Platform
 
-This project implements a fully automated, production-style DevSecOps platform that provisions infrastructure, configures Kubernetes, deploys monitoring, and verifies system health using a single bootstrap command.
+- Implemented a fully automated DevSecOps platform that provisions infrastructure, configures K8s, deploys monitoring, and verifies system health using a single bootstrap command. 
 
-#### _Automatic TLS Certificate Generation_
+### Clone the repository
 
-_- NOTE: This platform automatically generates required TLS certificates during bootstrap. No manual certificate creation is required just run bootstrap.sh given below._
+```bash
+git clone https://github.com/YOUR_USERNAME/big-project-2-cicd-pipeline.git
+cd big-project-2-cicd-pipeline
+```
 
+### Run the setup script
 ```bash
 ./bootstrap.sh
 ```
+
+- Now `./bootstrap.sh` script sets up all infra related things..,  
+- if you run this project for first time, we need to setup gitea, jenkins which is clearly mentioned below section.
+	- [Manual Setup (Educational/One-time setup given.)](#manual-setup-advanced--educational) 
+
+#### _Note: Automatic TLS Certificate Generation_
+
+_- This platform automatically generates required TLS certificates during bootstrap. No manual certificate creation is required just run bootstrap.sh given below._
+
+_- The script sets up infra then user should move to manual guide in below sections to **only one time setup of gitea, jenkins**._
+
+---
 
 This platform demonstrates real-world DevOps engineering practices including:
 
@@ -30,12 +46,13 @@ This platform demonstrates real-world DevOps engineering practices including:
 
 The entire environment can be provisioned, stopped, and restarted safely using automation scripts.
 
+---
 
 # Project Overview
 
 ### PROJECT: V2.0 - Feb 15, 2026
 
-- `Git Push` -> `Webhook` -> `Secret Scan` -> `Build` -> `Image Scan` -> `SBOM Generation` -> `Image Signing & Verify` -> `K8s Deploy` -> `Monitoring and Observability`.
+- `Git Push` > `Webhook` > `Secret Scan` > `Build` > `Image Scan` > `SBOM Generation` > `Image Signing & Verify` > `K8s Deploy` > `Monitoring and Observability`.
 
 ### Secure Software Supply Chain Flow of V2
 
@@ -55,7 +72,7 @@ The entire environment can be provisioned, stopped, and restarted safely using a
 
 ### PROJECT: V1.0 - Oct 18, 2025
 
-- `Git Push` -> `Webhook` -> `Build image` -> `k3s Cluster Pulls` ->  `Deploy pods` -> `Monitoring and Observability`.
+- `Git Push` > `Webhook` > `Build image` > `k3s Cluster Pulls` >  `Deploy pods` > `Monitoring and Observability`.
 
 ### Supply Chain Flow of V1
 
@@ -81,7 +98,7 @@ This project was an intensive exercise in system integration and debugging. Key 
 ```bash
 ~/projects/devsecops-platform
 ```
-Avoid:
+**Avoid**:
 ```bash
  /mnt/c/Users/.../Downloads/devsecops-platform
  ```
@@ -108,7 +125,7 @@ Avoid:
   - [Automation Scripts Overview](#automation-scripts-overview)
   - [Automated Provisioning Architecture](#automated-provisioning-architecture)
 
-- [Manual Setup (Advanced / Educational)](#manual-setup-advanced--educational)
+- [Manual Setup (Educational/One-time setup given.)](#manual-setup-advanced--educational)
   - [Prerequisites](#prerequisites)
   - [Step 1: Launch Core Infrastructure](#step-1-launch-the-core-infrastructure)
   - [Step 2: Create Kubernetes Cluster](#step-2-create-the-kubernetes-cluster)

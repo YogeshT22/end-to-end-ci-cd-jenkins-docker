@@ -17,6 +17,33 @@ fi
 
 echo "[OK] Internet connectivity verified"
 
+echo "========================================"
+echo "Checking TLS certificates..."
+echo "========================================"
+
+CERT_DIR="./certs"
+ROOT_CA="$CERT_DIR/rootCA.crt"
+REG_CERT="$CERT_DIR/local-docker-registry.pem"
+REG_KEY="$CERT_DIR/local-docker-registry-key.pem"
+
+if [ ! -f "$ROOT_CA" ] || [ ! -f "$REG_CERT" ] || [ ! -f "$REG_KEY" ]; then
+    echo "[WARN] TLS certificates not found."
+    echo "[INFO] Generating certificates..."
+
+    chmod +x scripts/generate-certs.sh
+    ./scripts/generate-certs.sh
+
+    if [ $? -ne 0 ]; then
+        echo "[ERROR] Certificate generation failed."
+        exit 1
+    fi
+
+    echo "[OK] Certificates generated successfully"
+else
+    echo "[OK] Certificates already exist"
+fi
+
+
 run_step() {
 
     local script="$1"

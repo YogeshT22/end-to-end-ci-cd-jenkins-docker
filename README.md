@@ -30,12 +30,6 @@ This platform demonstrates real-world DevOps engineering practices including:
 
 The entire environment can be provisioned, stopped, and restarted safely using automation scripts.
 
----
-
-
-
-
-### Demo Video: _will be added soon_
 
 # Project Overview
 
@@ -78,6 +72,21 @@ This project was an intensive exercise in system integration and debugging. Key 
 *   **Immutability of Infrastructure:** When a local cluster becomes "poisoned" with bad networking or security configs, it is faster and more reliable to delete and recreate it than to patch it.
 *   **Explicit Trust is Mandatory:** In a private, secure environment, "automatic" trust doesn't exist. Every communication hop (Jenkins -> Registry -> K8s) requires explicit certificate injection and verification.
 *   **Pathing and Quoting in WSL:** Windows file paths with spaces require strict quoting to prevent tools like `k3s` from failing to find volumes.
+
+#### _IMPORTANT (WSL USERS)_
+
+- For best reliability, clone and run the project inside WSL filesystem:
+
+**Correct**:
+```bash
+~/projects/devsecops-platform
+```
+Avoid:
+```bash
+ /mnt/c/Users/.../Downloads/devsecops-platform
+ ```
+ 
+- This avoids filesystem permission issues caused by Windows mounts.
 
 ## Table of Contents
 

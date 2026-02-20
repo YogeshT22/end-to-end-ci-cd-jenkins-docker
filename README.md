@@ -10,6 +10,10 @@
 
 This project implements a fully automated, production-style DevSecOps platform that provisions infrastructure, configures Kubernetes, deploys monitoring, and verifies system health using a single bootstrap command.
 
+#### _Automatic TLS Certificate Generation_
+
+_- NOTE: This platform automatically generates required TLS certificates during bootstrap. No manual certificate creation is required just run bootstrap.sh given below._
+
 ```bash
 ./bootstrap.sh
 ```
@@ -26,15 +30,20 @@ This platform demonstrates real-world DevOps engineering practices including:
 
 The entire environment can be provisioned, stopped, and restarted safely using automation scripts.
 
+---
+
+
+
+
 ### Demo Video: _will be added soon_
 
 # Project Overview
 
-## PROJECT: V2.0 - Feb 15, 2026
+### PROJECT: V2.0 - Feb 15, 2026
 
 - `Git Push` -> `Webhook` -> `Secret Scan` -> `Build` -> `Image Scan` -> `SBOM Generation` -> `Image Signing & Verify` -> `K8s Deploy` -> `Monitoring and Observability`.
 
-## Secure Software Supply Chain Flow of V2
+### Secure Software Supply Chain Flow of V2
 
 1. Developer pushes code to Gitea
 2. Gitea triggers Jenkins pipeline
@@ -50,11 +59,11 @@ The entire environment can be provisioned, stopped, and restarted safely using a
 
 ---
 
-## PROJECT: V1.0 - Oct 18, 2025
+### PROJECT: V1.0 - Oct 18, 2025
 
 - `Git Push` -> `Webhook` -> `Build image` -> `k3s Cluster Pulls` ->  `Deploy pods` -> `Monitoring and Observability`.
 
-## Supply Chain Flow of V1
+### Supply Chain Flow of V1
 
 1. Developer pushes code to Gitea
 2. Gitea triggers Jenkins pipeline

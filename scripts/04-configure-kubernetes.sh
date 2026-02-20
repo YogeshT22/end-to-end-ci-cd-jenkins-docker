@@ -7,7 +7,14 @@ echo "Kubernetes Configuration Script"
 echo "========================================"
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-APP_K8S_DIR="$PROJECT_ROOT/../sample-flask-app/k8s"
+APP_K8S_DIR="$PROJECT_ROOT/sample-flask-app/k8s"
+
+# Verify sample app Kubernetes manifests exist
+if [ ! -d "$APP_K8S_DIR" ]; then
+    echo "[ERROR] sample-flask-app not found at $APP_K8S_DIR"
+    echo "[INFO] Run bootstrap.sh or clone sample-flask-app"
+    exit 1
+fi
 
 SERVICE_ACCOUNT_FILE="$APP_K8S_DIR/service-account.yaml"
 SECRET_FILE="$APP_K8S_DIR/jenkins-token-secret.yaml"

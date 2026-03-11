@@ -6,6 +6,8 @@
 
 # Project: Production-Grade DevSecOps Platform, AWS Ready.
 
+![logo](assets/logo.png)
+
 ## One-Command Automated DevSecOps Platform
 
 - Implemented a fully automated DevSecOps platform that provisions infrastructure, configures K8s, deploys monitoring, and verifies system health using a single bootstrap command.
@@ -112,42 +114,51 @@ This project was an intensive exercise in system integration and debugging. Key 
 
 ## Table of Contents
 
+- [Project: Production-Grade DevSecOps Platform, AWS Ready.](#project-production-grade-devsecops-platform-aws-ready)
+  - [One-Command Automated DevSecOps Platform](#one-command-automated-devsecops-platform)
+    - [Clone the repository](#clone-the-repository)
+    - [Run the setup script](#run-the-setup-script)
+      - [_Note: Automatic TLS Certificate Generation_](#note-automatic-tls-certificate-generation)
 - [Project Overview](#project-overview)
-
-  - [Secure Software Supply Chain Flow of V2](#secure-software-supply-chain-flow-of-v2)
-  - [Supply Chain Flow of V1](#supply-chain-flow-of-v1)
+    - [PROJECT: V2.0 - Feb 15, 2026](#project-v20---feb-15-2026)
+    - [Secure Software Supply Chain Flow of V2](#secure-software-supply-chain-flow-of-v2)
+    - [PROJECT: V1.0 - Oct 18, 2025](#project-v10---oct-18-2025)
+    - [Supply Chain Flow of V1](#supply-chain-flow-of-v1)
   - [Lessons Learned](#lessons-learned)
-
-- [About Repository](#about-repository)
-
-  - [Core Concepts and Skills Demonstrated](#core-concepts--skills-demonstrated)
+      - [_IMPORTANT (WSL USERS)_](#important-wsl-users)
+  - [Table of Contents](#table-of-contents)
+  - [About Repository](#about-repository)
+  - [Core Concepts \& Skills Demonstrated](#core-concepts--skills-demonstrated)
   - [Architecture Diagram](#architecture-diagram)
   - [End-to-End Trust Architecture](#end-to-end-trust-architecture)
   - [Component Responsibilities](#component-responsibilities)
   - [Network Architecture](#network-architecture)
   - [Private Registry Security](#private-registry-security)
   - [Immutable Deployment Strategy](#immutable-deployment-strategy)
-
-- [Quick Start (Automated Setup - Recommended)](#quick-start-automated-setup---recommended)
-
+  - [Quick Start (Automated Setup - Recommended)](#quick-start-automated-setup---recommended)
+    - [Step 1: Clone the repository](#step-1-clone-the-repository)
+    - [Step 2: Run the bootstrap script](#step-2-run-the-bootstrap-script)
+    - [Platform Access URLs](#platform-access-urls)
+    - [Stop the Platform Safely](#stop-the-platform-safely)
   - [Automation Scripts Overview](#automation-scripts-overview)
   - [Automated Provisioning Architecture](#automated-provisioning-architecture)
-
-- [Manual Setup (Educational/One-time setup given.)](#manual-setup-advanced--educational)
-
-  - [Prerequisites](#prerequisites)
-  - [Step 1: Launch Core Infrastructure](#step-1-launch-the-core-infrastructure)
-  - [Step 2: Create Kubernetes Cluster](#step-2-create-the-kubernetes-cluster)
-  - [Step 3: One-Time Service Setup Gitea](#step-3-one-time-service-setup-gitea)
-  - [Step 4: Jenkins First-Time Setup](#step-4-jenkins-first-time-setup)
-  - [Step 5: Create and Configure Kubernetes Credentials](#step-5-create-and-configure-kubernetes-credentials)
-  - [Step 6: Creating custom Kubeconfig](#step-6-creating-custom-kubeconfig-jenkinsyaml-file)
-  - [Step 7: Configure the CI/CD Pipeline](#step-7-configure-the-cicd-pipeline)
-  - [Step 8: Deploy the Monitoring Stack](#step-8-deploy-the-monitoring-stack)
-  - [Step 9: Testing the Pipeline](#step-9-testing-the-pipeline)
-
-- [Appendix A: Standalone Terraform Demonstration](#appendix-a-standalone-terraform-demonstration)
-- [License](#license)
+  - [Manual Setup (Advanced / Educational)](#manual-setup-advanced--educational)
+    - [Step 1: Launch the Core Infrastructure](#step-1-launch-the-core-infrastructure)
+    - [Step 2: Create the Kubernetes Cluster](#step-2-create-the-kubernetes-cluster)
+    - [Step 3: One-Time Service Setup Gitea](#step-3-one-time-service-setup-gitea)
+    - [Step 4: Jenkins First-Time Setup](#step-4-jenkins-first-time-setup)
+    - [Step 5: Create and Configure Kubernetes Credentials](#step-5-create-and-configure-kubernetes-credentials)
+    - [Step 6: Creating custom Kubeconfig-jenkins.yaml file](#step-6-creating-custom-kubeconfig-jenkinsyaml-file)
+      - [Guide: How to Create the kubeconfig-jenkins.yaml File](#guide-how-to-create-the-kubeconfig-jenkinsyaml-file)
+      - [Prerequisites](#prerequisites)
+    - [Step 6.A: Get the Cluster's Certificate Authority (CA)](#step-6a-get-the-clusters-certificate-authority-ca)
+    - [Step 6.B: Get the Jenkins Service Account Token](#step-6b-get-the-jenkins-service-account-token)
+      - [Step 6.C: Assemble the kubeconfig-jenkins.yaml File](#step-6c-assemble-the-kubeconfig-jenkinsyaml-file)
+    - [Step 7: Configure the CI/CD Pipeline](#step-7-configure-the-cicd-pipeline)
+    - [Step 8: Deploy the Monitoring Stack (Optional, but recommended)](#step-8-deploy-the-monitoring-stack-optional-but-recommended)
+    - [Step 9: Testing the Pipeline](#step-9-testing-the-pipeline)
+    - [Appendix A: Standalone Terraform Demonstration](#appendix-a-standalone-terraform-demonstration)
+  - [License](#license)
 
 ## About Repository
 

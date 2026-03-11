@@ -2,22 +2,23 @@
 # Overrides for kube-prometheus-stack Helm chart
 # Target: Local development using k3d
 # Purpose: Reduce resource usage, simplify setup
+# Production note: Change adminPassword before any cloud deployment
 # ----------------------------------------
 
-# --- Global Settings ---
-# Dev Note: We don't need Alertmanager for this local setup.
+# Alertmanager not needed for local setup
 alertmanager:
   enabled: false
 
 grafana:
   service:
     type: NodePort
-
-    # Dev Note: NodePorts must be in the range 30000-32767.
     nodePort: 30900
 
-  # WARNING: it is a Hardcoded admin password for local use only. Never use in production.
-  adminPassword: "admin"
+  # Local-only password. For cloud/production, use a Kubernetes Secret instead:
+  # kubectl create secret generic grafana-admin-secret \
+  #   --from-literal=admin-user=admin \
+  #   --from-literal=admin-password=<strong-password> -n monitoring
+  adminPassword: "LocalDevOnly-ChangeMe!"
 
 prometheus:
   prometheusSpec:

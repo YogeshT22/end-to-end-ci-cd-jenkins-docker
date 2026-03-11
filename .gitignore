@@ -45,3 +45,9 @@ __pycache__/
 # Backup / scratch files
 *.bakk
 *.bak
+
+# sample-flask-app — lives in its own sibling repo.
+# 04-configure-kubernetes.sh resolves it at runtime; no symlink or clone
+# should ever be committed inside this repo.
+sample-flask-app/
+sample-flask-app

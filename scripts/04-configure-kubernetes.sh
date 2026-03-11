@@ -7,13 +7,28 @@ echo "Kubernetes Configuration Script"
 echo "========================================"
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-APP_K8S_DIR="$PROJECT_ROOT/sample-flask-app/k8s"
 
-# Verify sample app Kubernetes manifests exist
-if [ ! -d "$APP_K8S_DIR" ]; then
-    echo "[ERROR] sample-flask-app not found at $APP_K8S_DIR"
-    echo "[INFO] Run bootstrap.sh or clone sample-flask-app"
-    exit 1
+# ---------------------------------------------------------------
+# Locate sample-flask-app k8s manifests.
+# Priority order:
+#   1. Sibling directory  <parent>/sample-flask-app  (standard dev layout)
+#   2. Local clone inside the cicd repo              (fallback: clone from GitHub)
+# bootstrap.sh no longer needs to pre-create a symlink.
+# ---------------------------------------------------------------
+SIBLING_APP_DIR="$(dirname "$PROJECT_ROOT")/sample-flask-app"
+LOCAL_APP_DIR="$PROJECT_ROOT/sample-flask-app"
+
+if [ -d "$SIBLING_APP_DIR/k8s" ]; then
+    APP_K8S_DIR="$SIBLING_APP_DIR/k8s"
+    echo "[INFO] Using sibling sample-flask-app at: $SIBLING_APP_DIR"
+elif [ -d "$LOCAL_APP_DIR/k8s" ]; then
+    APP_K8S_DIR="$LOCAL_APP_DIR/k8s"
+    echo "[INFO] Using local sample-flask-app clone at: $LOCAL_APP_DIR"
+else
+    echo "[INFO] sample-flask-app not found locally — cloning from GitHub..."
+    git clone https://github.com/YogeshT22/sample-flask-app.git "$LOCAL_APP_DIR"
+    APP_K8S_DIR="$LOCAL_APP_DIR/k8s"
+    echo "[OK] Cloned sample-flask-app"
 fi
 
 SERVICE_ACCOUNT_FILE="$APP_K8S_DIR/service-account.yaml"

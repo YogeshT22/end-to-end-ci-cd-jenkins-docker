@@ -8,7 +8,7 @@
 
 ## One-Command Automated DevSecOps Platform
 
-- Implemented a fully automated DevSecOps platform that provisions infrastructure, configures K8s, deploys monitoring, and verifies system health using a single bootstrap command. 
+- Implemented a fully automated DevSecOps platform that provisions infrastructure, configures K8s, deploys monitoring, and verifies system health using a single bootstrap command.
 
 ### Clone the repository
 
@@ -18,13 +18,14 @@ cd big-project-2-cicd-pipeline
 ```
 
 ### Run the setup script
+
 ```bash
 ./bootstrap.sh
 ```
 
-- Now `./bootstrap.sh` script sets up all infra related things..,  
+- Now `./bootstrap.sh` script sets up all infra related things..,
 - if you run this project for first time, we need to setup gitea, jenkins which is clearly mentioned below section.
-	- [Manual Setup (Educational/One-time setup given.)](#manual-setup-advanced--educational) 
+  - [Manual Setup (Educational/One-time setup given.)](#manual-setup-advanced--educational)
 
 #### _Note: Automatic TLS Certificate Generation_
 
@@ -72,7 +73,7 @@ The entire environment can be provisioned, stopped, and restarted safely using a
 
 ### PROJECT: V1.0 - Oct 18, 2025
 
-- `Git Push` > `Webhook` > `Build image` > `k3s Cluster Pulls` >  `Deploy pods` > `Monitoring and Observability`.
+- `Git Push` > `Webhook` > `Build image` > `k3s Cluster Pulls` > `Deploy pods` > `Monitoring and Observability`.
 
 ### Supply Chain Flow of V1
 
@@ -86,33 +87,39 @@ The entire environment can be provisioned, stopped, and restarted safely using a
 ## Lessons Learned
 
 This project was an intensive exercise in system integration and debugging. Key takeaways include:
-*   **Immutability of Infrastructure:** When a local cluster becomes "poisoned" with bad networking or security configs, it is faster and more reliable to delete and recreate it than to patch it.
-*   **Explicit Trust is Mandatory:** In a private, secure environment, "automatic" trust doesn't exist. Every communication hop (Jenkins -> Registry -> K8s) requires explicit certificate injection and verification.
-*   **Pathing and Quoting in WSL:** Windows file paths with spaces require strict quoting to prevent tools like `k3s` from failing to find volumes.
+
+- **Immutability of Infrastructure:** When a local cluster becomes "poisoned" with bad networking or security configs, it is faster and more reliable to delete and recreate it than to patch it.
+- **Explicit Trust is Mandatory:** In a private, secure environment, "automatic" trust doesn't exist. Every communication hop (Jenkins -> Registry -> K8s) requires explicit certificate injection and verification.
+- **Pathing and Quoting in WSL:** Windows file paths with spaces require strict quoting to prevent tools like `k3s` from failing to find volumes.
 
 #### _IMPORTANT (WSL USERS)_
 
 - For best reliability, clone and run the project inside WSL filesystem:
 
 **Correct**:
+
 ```bash
 ~/projects/devsecops-platform
 ```
+
 **Avoid**:
+
 ```bash
  /mnt/c/Users/.../Downloads/devsecops-platform
- ```
- 
+```
+
 - This avoids filesystem permission issues caused by Windows mounts.
 
 ## Table of Contents
 
 - [Project Overview](#project-overview)
+
   - [Secure Software Supply Chain Flow of V2](#secure-software-supply-chain-flow-of-v2)
   - [Supply Chain Flow of V1](#supply-chain-flow-of-v1)
   - [Lessons Learned](#lessons-learned)
 
 - [About Repository](#about-repository)
+
   - [Core Concepts and Skills Demonstrated](#core-concepts--skills-demonstrated)
   - [Architecture Diagram](#architecture-diagram)
   - [End-to-End Trust Architecture](#end-to-end-trust-architecture)
@@ -122,10 +129,12 @@ This project was an intensive exercise in system integration and debugging. Key 
   - [Immutable Deployment Strategy](#immutable-deployment-strategy)
 
 - [Quick Start (Automated Setup - Recommended)](#quick-start-automated-setup---recommended)
+
   - [Automation Scripts Overview](#automation-scripts-overview)
   - [Automated Provisioning Architecture](#automated-provisioning-architecture)
 
 - [Manual Setup (Educational/One-time setup given.)](#manual-setup-advanced--educational)
+
   - [Prerequisites](#prerequisites)
   - [Step 1: Launch Core Infrastructure](#step-1-launch-the-core-infrastructure)
   - [Step 2: Create Kubernetes Cluster](#step-2-create-the-kubernetes-cluster)
@@ -140,7 +149,6 @@ This project was an intensive exercise in system integration and debugging. Key 
 - [Appendix A: Standalone Terraform Demonstration](#appendix-a-standalone-terraform-demonstration)
 - [License](#license)
 
-
 ## About Repository
 
 This repository contains the Infrastructure as Code for a complete, local DevOps ecosystem that simulates a modern, secure software delivery lifecycle. Using Docker Compose, it orchestrates a suite of best-in-class open-source tools to automatically build, test, secure, and deploy a containerized application to a multi-node Kubernetes cluster.
@@ -151,36 +159,33 @@ The platform is designed as a hands-on learning environment to master advanced c
 
 **Jump to how to install and run section quickly by if you hate reading!!**: [How to Run This Platform](#how-to-run-this-platform)
 
-
 ## Core Concepts & Skills Demonstrated
 
-*   **DevSecOps Pipeline Design:** Implemented a full, multi-stage pipeline with a "Security First" approach: 
-	- `Git Push` -> `Webhook` -> `Secret Scan` -> `Build` -> `Image Scan` -> `SBOM Generation` -> `Image Signing & Verification` -> `Deploy`.
-*   **Infrastructure as Code (IaC):**
-    *   **Docker Compose:** Used for the orchestration of the core CI/CD toolchain.
-    *   **Terraform:** Includes a standalone demonstration of the core Terraform workflow for infrastructure provisioning.
-*   **Secure Infrastructure:**
-    *   **Native TLS Registry:** Deployed a private Docker Registry secured with HTTPS using locally trusted certificates generated by `mkcert`.
-    *   **End-to-End Trust:** Engineered a "Circle of Trust" where all components (Docker daemon, Jenkins, K3s nodes) are configured to trust the custom root CA, eliminating the need for insecure flags.
-*   **Container Orchestration:** Deployed and managed applications on a **Kubernetes (K3s)** cluster, using `Deployments`, `Services`, and `Ingress`.
-*   **Software Supply Chain Security:**
-    *   **Vulnerability Scanning:** Integrated **Trivy** for both filesystem (pre-build) and container image (post-build) scanning.
-    *   **SBOM Generation:** Created a CycloneDX Software Bill of Materials for every build.
-    *   **Image Integrity:** Used **Cosign** to cryptographically sign and verify container images, ensuring they are not tampered with between build and deployment.
-*   **Observability & Monitoring:** Deployed **Prometheus** and **Grafana** using a **Helm** chart to collect and visualize real-time metrics.
-
-
+- **DevSecOps Pipeline Design:** Implemented a full, multi-stage pipeline with a "Security First" approach:
+  - `Git Push` -> `Webhook` -> `Secret Scan` -> `Build` -> `Image Scan` -> `SBOM Generation` -> `Image Signing & Verification` -> `Deploy`.
+- **Infrastructure as Code (IaC):**
+  - **Docker Compose:** Used for the orchestration of the core CI/CD toolchain.
+  - **Terraform:** Includes a standalone demonstration of the core Terraform workflow for infrastructure provisioning.
+- **Secure Infrastructure:**
+  - **Native TLS Registry:** Deployed a private Docker Registry secured with HTTPS using locally trusted certificates generated by `mkcert`.
+  - **End-to-End Trust:** Engineered a "Circle of Trust" where all components (Docker daemon, Jenkins, K3s nodes) are configured to trust the custom root CA, eliminating the need for insecure flags.
+- **Container Orchestration:** Deployed and managed applications on a **Kubernetes (K3s)** cluster, using `Deployments`, `Services`, and `Ingress`.
+- **Software Supply Chain Security:**
+  - **Vulnerability Scanning:** Integrated **Trivy** for both filesystem (pre-build) and container image (post-build) scanning.
+  - **SBOM Generation:** Created a CycloneDX Software Bill of Materials for every build.
+  - **Image Integrity:** Used **Cosign** to cryptographically sign and verify container images, ensuring they are not tampered with between build and deployment.
+- **Observability & Monitoring:** Deployed **Prometheus** and **Grafana** using a **Helm** chart to collect and visualize real-time metrics.
 
 ## Architecture Diagram
 
 ![Architecture Diagram](assets/arch.png)
-
 
 ## End-to-End Trust Architecture
 
 This platform implements a complete cryptographic trust chain across the software supply chain:
 
 1. **Certificate Authority (CA)**
+
    - A custom Root CA is generated using `mkcert`.
    - This CA signs the private Docker Registry TLS certificate.
 
@@ -195,6 +200,7 @@ This platform implements a complete cryptographic trust chain across the softwar
    This allows all components to securely communicate with the private registry without insecure flags.
 
 4. **Image Integrity**
+
    - Images are signed using Cosign private key.
    - Public key (cosign.pub) is stored in repository.
    - Jenkins verifies image signatures before deployment.
@@ -209,21 +215,19 @@ This ensures:
 - Deployment integrity
 - End-to-end supply chain security
 
-
-
 ## Component Responsibilities
 
-| Component | Role |
-|--------|------|
-| Gitea | Source code management and webhook trigger |
-| Jenkins | CI/CD orchestration, build, scan, sign, deploy |
-| Docker Registry | Secure image storage with TLS |
-| Trivy | Secret scanning and vulnerability scanning |
-| Cosign | Image signing and verification |
-| Kubernetes (k3s) | Container orchestration |
-| Prometheus | Metrics collection |
-| Grafana | Metrics visualization |
-| mkcert | Local certificate authority |
+| Component        | Role                                           |
+| ---------------- | ---------------------------------------------- |
+| Gitea            | Source code management and webhook trigger     |
+| Jenkins          | CI/CD orchestration, build, scan, sign, deploy |
+| Docker Registry  | Secure image storage with TLS                  |
+| Trivy            | Secret scanning and vulnerability scanning     |
+| Cosign           | Image signing and verification                 |
+| Kubernetes (k3s) | Container orchestration                        |
+| Prometheus       | Metrics collection                             |
+| Grafana          | Metrics visualization                          |
+| mkcert           | Local certificate authority                    |
 
 ## Network Architecture
 
@@ -292,12 +296,12 @@ chmod +x bootstrap.sh
 
 This script will automatically:
 
-* Start Docker infrastructure (Gitea, Jenkins, Private Registry)
-* Wait for all services to become ready
-* Create or recover the Kubernetes cluster
-* Configure Kubernetes credentials for CI/CD
-* Deploy Prometheus and Grafana monitoring stack
-* Verify full platform health and connectivity
+- Start Docker infrastructure (Gitea, Jenkins, Private Registry)
+- Wait for all services to become ready
+- Create or recover the Kubernetes cluster
+- Configure Kubernetes credentials for CI/CD
+- Deploy Prometheus and Grafana monitoring stack
+- Verify full platform health and connectivity
 
 No manual setup steps are required.
 
@@ -326,8 +330,8 @@ To stop all infrastructure without deleting data:
 
 This safely stops:
 
-* Kubernetes cluster
-* Docker containers
+- Kubernetes cluster
+- Docker containers
 
 All data, registry images, and configurations are preserved.
 
@@ -365,10 +369,10 @@ The platform follows a production-grade bootstrap model:
 
 This ensures the platform is:
 
-* Fully reproducible
-* Safe to rerun
-* Resistant to partial failures
-* Suitable for real DevOps workflows
+- Fully reproducible
+- Safe to rerun
+- Resistant to partial failures
+- Suitable for real DevOps workflows
 
 ---
 
@@ -378,14 +382,11 @@ Manual setup instructions are provided below for educational purposes and to dem
 
 For normal usage, the automated bootstrap method is recommended.
 
-
 **Prerequisites:**
 
 - **Docker Desktop** with WSL2 integration enabled.
 - **WSL2** with a Linux distribution (e.g., Ubuntu).
 - **Helm** and **k3s** installed inside your WSL environment.
-
-
 
 ### Step 1: Launch the Core Infrastructure
 
@@ -403,9 +404,9 @@ _Wait 2-3 minutes for all services to initialize before proceeding._
 
 - Use k3s to create a multi-node cluster connected to the CI/CD network and configured to trust the local registry.
 
-- **Note 1A** 
-	- **If registries.yaml doesnt exist create one and copy paste below code.** 
-	- if registries.yaml does exist then -> go to **Note 1b**.
+- **Note 1A**
+  - **If registries.yaml doesnt exist create one and copy paste below code.**
+  - if registries.yaml does exist then -> go to **Note 1b**.
 
 ```yaml
 #Create a registries.yaml in project root and paste the below code in that file and save it.
@@ -440,17 +441,18 @@ k3d cluster create devops-cluster \
 Perform the initial setup for Gitea.
 
 1. Open your browser to `http://localhost:8081`.
-2. On the initial configuration page, it is critical to set the following: 
-	- Database Type: `SQLite3` (default is fine). 
-	- Server Domain: `gitea-server` 
-	- Gitea Base URL: `http://gitea-server:8081/`
-   (This ensures Jenkins can find Gitea using its service name on the Docker network).
+2. On the initial configuration page, it is critical to set the following:
+
+   - Database Type: `SQLite3` (default is fine).
+   - Server Domain: `gitea-server`
+   - Gitea Base URL: `http://gitea-server:8081/`
+     (This ensures Jenkins can find Gitea using its service name on the Docker network).
 
 3. Expand "Administrator Account Settings" and create your admin user.
 4. Click `"Install Gitea"` and log in.
 5. Create a new public repository named `sample-flask-app`.
 6. Follow the instructions on the Gitea page to push your local sample-flask-app code to this new repository.
-	- _creating new remote like `git remote add gitea http://admin:admin localhost:8081/admin/sample-flask-app.git`_
+   - _creating new remote like `git remote add gitea http://admin:admin localhost:8081/admin/sample-flask-app.git`_
 
 ---
 
@@ -480,6 +482,7 @@ docker logs jenkins-server
 Before creating the Jenkins job, you must provide Jenkins with the credentials to access your K3s cluster.
 
 _(go to application folder)_
+
 1. **Apply the Service Account manifests** from the `sample-flask-app` repository to your cluster:
 
    ```bash
@@ -500,7 +503,6 @@ _Below steps to get CA certificate and Service account token._
 
 - This file is the key that allows Jenkins to securely authenticate with your Kubernetes cluster using the dedicated jenkins-admin Service Account. You will construct this file by gathering four pieces of dynamic information from your running environment.
 
-
 ---
 
 #### Prerequisites
@@ -508,8 +510,6 @@ _Below steps to get CA certificate and Service account token._
 - Your k3s cluster is running.
 
 - You have already applied the service-account.yaml and jenkins-token-secret.yaml manifests to your cluster.
-
-
 
 ### Step 6.A: Get the Cluster's Certificate Authority (CA)
 
@@ -569,8 +569,7 @@ current-context: jenkins-context
 
 Fill in the placeholders using the two pieces of information(CA data and Service TOKEN) you just collected.
 
-
-- You now have the complete and correct `kubeconfig-jenkins.yaml` file. 
+- You now have the complete and correct `kubeconfig-jenkins.yaml` file.
 - The final step is to upload this file to the Jenkins credentials store as a "Secret file" with the ID `kubeconfig-sa`.
 
 ---
@@ -590,11 +589,11 @@ Fill in the placeholders using the two pieces of information(CA data and Service
 
 2. Configure the **Gitea Webhook**:
 
-   - In Gitea, go to your 
-	- `sample-flask-app repository` -> `Settings` -> `Webhooks`.
+   - In Gitea, go to your
+   - `sample-flask-app repository` -> `Settings` -> `Webhooks`.
    - Click `"Add Webhook"` -> `"Gitea"`.
-   - Target URL: Use the **following format or pattern below**, 
-   - add your `Jenkins username` and the `API token` you just generated from **Step 4**. 
+   - Target URL: Use the **following format or pattern below**,
+   - add your `Jenkins username` and the `API token` you just generated from **Step 4**.
    - This authenticates the request and bypasses CSRF protection (Not recommended for production.).
 
 - **Pattern** - <http://YOUR_JENKINS_USER:YOUR_API_TOKEN@jenkins-server:8080/job/flask-app-pipeline/build/>
@@ -631,7 +630,6 @@ helm install prometheus-stack prometheus-community/kube-prometheus-stack -n moni
 - Grafana accessible at `http://localhost:30900` (user/admin).
 - _(Refer to helm-configs/prometheus-values.yaml for custom configuration.)_
 
-
 ---
 
 ### Step 9: Testing the Pipeline
@@ -642,7 +640,6 @@ You can now trigger the pipeline in two ways:
 2. **Automatically**: Make a code change in your local sample-flask-app, then git commit and git push it to Gitea. The pipeline should start within seconds.
 
 After a successful run, you can view your deployed application at `<http://localhost:8082>`.
-
 
 ### Appendix A: Standalone Terraform Demonstration
 
@@ -660,10 +657,6 @@ This directory demonstrates the core workflow for infrastructure provisioning us
 
 - **To Clean Up:** `terraform destroy`
 - **Directory:** `terraform-local-docker/`
-
-
-
-
 
 ## License
 

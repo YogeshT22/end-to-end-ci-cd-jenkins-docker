@@ -2,10 +2,10 @@ FROM jenkins/jenkins:lts-jdk17
 
 USER root
 
-# Basic tools
+# Basic tools + gosu (used by entrypoint to re-exec as jenkins with fresh groups)
 RUN apt-get update && apt-get install -y \
   git curl sudo wget apt-transport-https \
-  ca-certificates gnupg lsb-release gpg tar gzip \
+  ca-certificates gnupg lsb-release gpg tar gzip gosu \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Trust the mkcert Root CA - baked into the image at build time
@@ -40,16 +40,15 @@ RUN curl -L "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VE
 # no groupmod needed — we just add jenkins to the existing group.
 RUN usermod -aG docker jenkins
 
-# Runtime entrypoint: re-GIDs the docker group to match the host socket GID.
-# This is required because the host /var/run/docker.sock GID is not known at
-# build time and differs per machine.
-# Allow the entrypoint to call groupmod without a password via sudo.
+# Runtime entrypoint: re-GIDs the docker group to match the host socket GID,
+# then uses gosu to re-exec as the jenkins user with a fresh group credential
+# set. The entrypoint must run as root (default USER) to call groupmod directly.
+# No sudo sudoers rule needed — root can call groupmod without it.
 COPY jenkins/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh && \
-  echo "jenkins ALL=(root) NOPASSWD: /usr/sbin/groupmod" >> /etc/sudoers.d/jenkins-docker && \
-  chmod 0440 /etc/sudoers.d/jenkins-docker
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Switch back to jenkins user - container runs as non-root
-USER jenkins
+# Stay as root so the entrypoint can call groupmod and gosu without privilege escalation.
+# gosu will drop to jenkins with the correct groups after the fix.
+# USER jenkins  <-- intentionally NOT set here; entrypoint handles the privilege drop.
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

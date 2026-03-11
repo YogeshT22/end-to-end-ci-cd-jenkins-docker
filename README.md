@@ -426,6 +426,7 @@ configs:
 k3d cluster create devops-cluster \
   --api-port 6550 \
   -p "8082:80@loadbalancer" \
+  -p "30900:30900@loadbalancer" \
   --network big-project-2-cicd-pipeline_cicd-net \
   --registry-config registries.yaml \
   --volume "$(pwd)/certs/rootCA.crt:/usr/local/share/ca-certificates/my-root-ca.crt@server:*" \
@@ -538,27 +539,32 @@ This will output another very long string of characters starting with ey.... Cop
 
 Now, create a new, empty file named kubeconfig-jenkins.yaml and paste the following template into it.
 
+> **⚠️ Critical:** The `server` URL **must** use `k3d-devops-cluster-serverlb:6443` (the k3d
+> loadbalancer container hostname on the `cicd-net` Docker network). Do **not** use
+> `host.docker.internal:6550` — that hostname is not in the API server's TLS certificate SANs
+> and will cause an `x509: certificate is valid for ...` error inside the Jenkins container.
+
 Template:
 
 ```yaml
 apiVersion: v1
 kind: Config
 clusters:
-  - name: k3d-devops-cluster-devops-cluster
+  - name: k3d-devops-cluster
     cluster:
-      server: https://host.docker.internal:6550
-      certificate-authority-data: YOUR BASE64_CA
+      server: https://k3d-devops-cluster-serverlb:6443
+      certificate-authority-data: YOUR_BASE64_CA_HERE
 users:
   - name: jenkins-admin
     user:
-      token: SERVICE_ACCOUNT_TOKEN (starting with ey...)
+      token: YOUR_SERVICE_ACCOUNT_TOKEN_HERE
 contexts:
-  - name: k3d-devops-cluster
+  - name: jenkins-context
     context:
       cluster: k3d-devops-cluster
       user: jenkins-admin
       namespace: default
-current-context: k3d-devops-cluster
+current-context: jenkins-context
 ```
 
 Fill in the placeholders using the two pieces of information(CA data and Service TOKEN) you just collected.

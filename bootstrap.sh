@@ -64,28 +64,7 @@ else
 fi
 
 # ---------------------------------------------------------------
-# STEP 2: Ensure sample-flask-app is available
-# ---------------------------------------------------------------
-echo "========================================"
-echo "Sample Application Setup"
-echo "========================================"
-
-LOCAL_APP_DIR="$SCRIPT_DIR/sample-flask-app"
-PARENT_APP_DIR="$(dirname "$SCRIPT_DIR")/sample-flask-app"
-
-if [ -d "$LOCAL_APP_DIR" ]; then
-    echo "[OK] Sample app found inside platform repo"
-elif [ -d "$PARENT_APP_DIR" ]; then
-    echo "[OK] Sample app found in parent directory - creating symlink"
-    ln -sf "$PARENT_APP_DIR" "$LOCAL_APP_DIR"
-else
-    echo "[INFO] Sample app not found. Cloning..."
-    git clone https://github.com/YogeshT22/sample-flask-app.git "$LOCAL_APP_DIR"
-    echo "[OK] Sample app cloned"
-fi
-
-# ---------------------------------------------------------------
-# STEP 3 onwards: Run modular infrastructure scripts
+# STEP 2 onwards: Run modular infrastructure scripts
 # ---------------------------------------------------------------
 run_step "01-start-infrastructure.sh"
 run_step "02-wait-for-services.sh"

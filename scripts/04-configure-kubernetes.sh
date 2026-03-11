@@ -62,13 +62,17 @@ fi
 
 echo "[INFO] Generating kubeconfig for Jenkins..."
 
+# Use the k3d serverlb container hostname — it is on the shared cicd-net Docker
+# network alongside Jenkins, and its name is present in the API server TLS cert SANs.
+# Do NOT use host.docker.internal:6550 — that hostname is NOT in the cert SANs
+# and will cause x509 TLS verification failures inside the Jenkins container.
 cat > "$OUTPUT_KUBECONFIG" <<EOF
 apiVersion: v1
 kind: Config
 clusters:
 - name: k3d-devops-cluster
   cluster:
-    server: https://host.docker.internal:6550
+    server: https://k3d-${CLUSTER_NAME}-serverlb:6443
     certificate-authority-data: $CA_DATA
 
 users:
@@ -86,5 +90,28 @@ contexts:
 current-context: jenkins-context
 EOF
 
-echo "[SUCCESS] kubeconfig generated at:"
-echo "$OUTPUT_KUBECONFIG"
+echo "[SUCCESS] kubeconfig generated at: $OUTPUT_KUBECONFIG"
+
+# ---------------------------------------------------------------
+# Apply app Kubernetes manifests (deployment, service, ingress)
+# This must happen BEFORE Jenkins runs its first pipeline so that
+# `kubectl set image` has a Deployment object to update.
+# These are idempotent (kubectl apply) — safe to run on every start.
+# ---------------------------------------------------------------
+echo "[INFO] Applying app Kubernetes manifests (deployment, service, ingress)..."
+
+DEPLOYMENT_FILE="$APP_K8S_DIR/deployment.yaml"
+SERVICE_FILE="$APP_K8S_DIR/service.yaml"
+INGRESS_FILE="$APP_K8S_DIR/ingress.yaml"
+
+for f in "$DEPLOYMENT_FILE" "$SERVICE_FILE" "$INGRESS_FILE"; do
+    if [ ! -f "$f" ]; then
+        echo "[WARN] Manifest not found, skipping: $f"
+    fi
+done
+
+KUBECONFIG="$OUTPUT_KUBECONFIG" kubectl apply -f "$DEPLOYMENT_FILE" || true
+KUBECONFIG="$OUTPUT_KUBECONFIG" kubectl apply -f "$SERVICE_FILE"    || true
+KUBECONFIG="$OUTPUT_KUBECONFIG" kubectl apply -f "$INGRESS_FILE"    || true
+
+echo "[OK] App manifests applied (deployment/service/ingress)"

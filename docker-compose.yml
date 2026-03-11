@@ -1,7 +1,11 @@
 # --------------------------------------
-# Docker Compose file for Gitea, Jenkins, and Local Docker Registry
-# Purpose: Set up a local CI/CD environment
-# Target: Local development using Docker
+# Docker Compose - CI/CD Platform
+# Services: Gitea, Jenkins, Private Registry
+# Production practices:
+#   - Pinned image versions (no :latest)
+#   - Jenkins runs as jenkins user (not root)
+#   - No privileged mode
+#   - TLS on registry
 # --------------------------------------
 
 networks:
@@ -11,7 +15,7 @@ networks:
 
 services:
   gitea:
-    image: gitea/gitea:latest
+    image: gitea/gitea:1.25.4
     container_name: gitea-server
     environment:
       - USER_UID=1000
@@ -21,54 +25,47 @@ services:
       - gitea-data:/data
     ports:
       - "8081:3000"
-      - "222:22" # Dev Note: Gitea SSH
+      - "222:22"
     networks:
       - cicd-net
-    restart: always
+    restart: unless-stopped
 
   jenkins:
     build:
       context: .
-      dockerfile: jenkins/Dockerfile
+      dockerfile: jenkins/dockerfile
     container_name: jenkins-server
-    privileged: true
-    user: root
-    # Add a custom environment variable for a CASC config (future use, but good structure)
+    # No privileged mode - Jenkins runs as the jenkins user (docker group member)
     environment:
       - CASC_JENKINS_CONFIG=/var/jenkins_home/casc.yaml
     volumes:
       - jenkins-data:/var/jenkins_home
+      # Docker socket is mounted so Jenkins can build images.
+      # Jenkins user is added to the docker group in the Dockerfile.
       - /var/run/docker.sock:/var/run/docker.sock
-      # # TRUST FIX: Mount the Root CA directly into Jenkins' trusted store
-      # - ./certs/rootCA.pem:/usr/local/share/ca-certificates/my-root-ca.crt
-      #- /usr/bin/docker:/usr/bin/docker
-      #- /usr/local/bin/kubectl:/usr/local/bin/kubectl
-      #- /usr/local/bin/trivy:/usr/local/bin/trivy
     ports:
       - "8080:8080"
       - "50000:50000"
     networks:
       - cicd-net
-    restart: always
+    restart: unless-stopped
 
   registry:
-    image: registry:2
+    image: registry:2.8.3
     container_name: local-docker-registry
     environment:
-      # NATIVE TLS CONFIGURATION FOR THE REGISTRY
       - REGISTRY_HTTP_ADDR=0.0.0.0:5000
       - REGISTRY_HTTP_TLS_CERTIFICATE=/certs/local-docker-registry.pem
       - REGISTRY_HTTP_TLS_KEY=/certs/local-docker-registry-key.pem
     volumes:
-      - ./certs:/certs:ro # Mount the certs read-only
-      - registry-data:/var/lib/registry # Persist registry data
+      - ./certs:/certs:ro
+      - registry-data:/var/lib/registry
     ports:
       - "5000:5000"
     networks:
       - cicd-net
-    restart: always
+    restart: unless-stopped
 
-# REMINDER: Define the named volumes for data persistence.
 volumes:
   gitea-data:
   jenkins-data:

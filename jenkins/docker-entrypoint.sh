@@ -1,12 +1,12 @@
 #!/bin/bash
 # docker-entrypoint.sh
 # -----------------------------------------------------------------------
-# Fixes the docker group GID at container start-up to match the GID of
-# the host's /var/run/docker.sock. This is necessary because the host
-# socket GID is not known at image build time (it differs per machine).
-#
-# Without this, the jenkins user cannot reach the Docker API even though
-# it is a member of the 'docker' group inside the container.
+# Runs as ROOT so it can call groupmod directly (no sudo needed).
+# After fixing the docker group GID it uses gosu to re-exec as the
+# jenkins user with a fresh group credential set that includes the
+# corrected docker GID.  exec-ing via gosu is the only reliable way to
+# pass updated supplementary groups to the Jenkins JVM — simply calling
+# `exec jenkins.sh` after groupmod does NOT refresh the process groups.
 # -----------------------------------------------------------------------
 set -euo pipefail
 
@@ -18,14 +18,16 @@ if [ -S "$SOCK" ]; then
 
     if [ "$HOST_GID" != "$CURRENT_GID" ]; then
         echo "[entrypoint] Adjusting docker group GID: ${CURRENT_GID} -> ${HOST_GID}"
-        sudo groupmod -g "$HOST_GID" docker
+        groupmod -g "$HOST_GID" docker
     else
         echo "[entrypoint] docker group GID already matches host (${HOST_GID}), no change needed"
     fi
+    echo "[entrypoint] docker.sock permissions: $(ls -la $SOCK)"
+    echo "[entrypoint] jenkins groups after fix: $(id jenkins)"
 else
     echo "[entrypoint] WARNING: ${SOCK} not found - Docker builds will not work"
 fi
 
-# Drop privileges are already handled - jenkins user runs this script.
-# Exec the real Jenkins entrypoint.
-exec /usr/bin/tini -- /usr/local/bin/jenkins.sh "$@"
+# Re-exec as jenkins user via gosu so the JVM inherits a fresh group list
+# that includes the (possibly updated) docker GID.
+exec gosu jenkins /usr/bin/tini -- /usr/local/bin/jenkins.sh "$@"

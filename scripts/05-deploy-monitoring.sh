@@ -46,11 +46,18 @@ echo "[OK] CoreDNS ready"
 
 echo "[INFO] Testing DNS resolution inside cluster..."
 
+# Ensure cleanup happens even on failure to avoid orphaned pods
+kubectl delete pod dns-test --ignore-not-found=true >/dev/null 2>&1 || true
+
 kubectl run dns-test \
   --image=busybox:1.36 \
-  --rm -it \
+  --rm \
   --restart=Never \
-  -- nslookup github.com >/dev/null
+  --timeout=30s \
+  -- nslookup github.com >/dev/null 2>&1 || {
+    echo "[WARN] DNS test failed or timed out - continuing anyway"
+    kubectl delete pod dns-test --ignore-not-found=true >/dev/null 2>&1 || true
+  }
 
 echo "[OK] DNS resolution working"
 

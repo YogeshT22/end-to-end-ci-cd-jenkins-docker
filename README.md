@@ -6,38 +6,19 @@
 
 ![logo](assets/logo.png)
 
-## One-Command Automated DevSecOps Platform
+## About Repository
 
-Implemented a fully automated DevSecOps platform that provisions infrastructure, configures K8s, deploys monitoring, and verifies system health using a single bootstrap command.
+This repository contains the Infrastructure as Code for a complete, local DevOps ecosystem that simulates a modern, secure software delivery lifecycle. Using Docker Compose, it orchestrates a suite of best-in-class open-source tools to automatically build, test, secure, and deploy a containerized application to a multi-node Kubernetes cluster.
 
-### Clone the repository
+The platform is designed as a hands-on learning environment to master advanced concepts including native TLS, container security, pipeline-as-code, and Infrastructure as Code (IaC).
 
-```bash
-git clone https://github.com/YOUR_USERNAME/big-project-2-cicd-pipeline.git
-cd big-project-2-cicd-pipeline
-```
+**Companion Application Repository:** [https://github.com/YogeshT22/sample-flask-app](https://github.com/YogeshT22/sample-flask-app)
 
-###
+---
 
 </div>
 
-### Run the setup script
-
-```bash
-./bootstrap.sh
-```
-
-- Now `./bootstrap.sh` script sets up all infra related things..,
-- if you run this project for first time, we need to setup gitea, jenkins which is clearly mentioned below section.
-  - [Manual Setup (Educational/One-time setup given.)](#manual-setup-advanced--educational)
-
-#### _Note: Automatic TLS Certificate Generation_
-
-_- This platform automatically generates required TLS certificates during bootstrap. No manual certificate creation is required just run bootstrap.sh given below._
-
-_- The script sets up infra then user should move to manual guide in below sections to **only one time setup of gitea, jenkins**._
-
----
+# Project Overview
 
 This platform demonstrates real-world DevOps engineering practices including:
 
@@ -51,13 +32,38 @@ This platform demonstrates real-world DevOps engineering practices including:
 
 The entire environment can be provisioned, stopped, and restarted safely using automation scripts.
 
----
+## One-Command Automated DevSecOps Platform
 
-# Project Overview
+Implemented a fully automated DevSecOps platform that provisions infrastructure, configures K8s, deploys monitoring, and verifies system health using a single bootstrap command.
+
+### Clone the repository
+
+```bash
+git clone https://github.com/YogeshT22/big-project-2-cicd-pipeline.git
+cd big-project-2-cicd-pipeline
+```
+
+### Run the setup script
+
+```bash
+./bootstrap.sh
+```
+
+- Now `./bootstrap.sh` script sets up all infra related things..,
+- if you run this project for first time, we need to setup gitea, jenkins which is clearly mentioned below section.
+- [Manual Setup (Educational/One-time setup given.)](#manual-setup-advanced--educational)
+
+#### _Note: Automatic TLS Certificate Generation_
+
+- This platform automatically generates required TLS certificates during bootstrap. No manual certificate creation is required just run bootstrap.sh given below.
+
+- The script sets up infra then user should move to manual guide in below sections to **only one time setup of gitea, jenkins**.
+
+---
 
 ### PROJECT: V2.0 - Feb 15, 2026
 
-- `Git Push` > `Webhook` > `Secret Scan` > `Build` > `Image Scan` > `SBOM Generation` > `Image Signing & Verify` > `K8s Deploy` > `Monitoring and Observability`.
+`Git Push` > `Webhook` > `Secret Scan` > `Build` > `Image Scan` > `SBOM Generation` > `Image Signing & Verify` > `K8s Deploy` > `Monitoring and Observability`.
 
 ### Secure Software Supply Chain Flow of V2
 
@@ -77,7 +83,7 @@ The entire environment can be provisioned, stopped, and restarted safely using a
 
 ### PROJECT: V1.0 - Oct 18, 2025
 
-- `Git Push` > `Webhook` > `Build image` > `k3s Cluster Pulls` > `Deploy pods` > `Monitoring and Observability`.
+`Git Push` > `Webhook` > `Build` > `Push to Registry` > `K8s Pull & Deploy`.
 
 ### Supply Chain Flow of V1
 
@@ -90,13 +96,14 @@ The entire environment can be provisioned, stopped, and restarted safely using a
 
 ## Lessons Learned
 
-This project was an intensive exercise in system integration and debugging. Key takeaways include:
+This project was an intensive exercise in system integration and
+debugging. Key takeaways include:
 
 - **Immutability of Infrastructure:** When a local cluster becomes "poisoned" with bad networking or security configs, it is faster and more reliable to delete and recreate it than to patch it.
 - **Explicit Trust is Mandatory:** In a private, secure environment, "automatic" trust doesn't exist. Every communication hop (Jenkins -> Registry -> K8s) requires explicit certificate injection and verification.
 - **Pathing and Quoting in WSL:** Windows file paths with spaces require strict quoting to prevent tools like `k3s` from failing to find volumes.
 
-#### _IMPORTANT (WSL USERS)_
+### IMPORTANT (WSL USERS)
 
 - For best reliability, clone and run the project inside WSL filesystem:
 
@@ -105,6 +112,8 @@ This project was an intensive exercise in system integration and debugging. Key 
 ```bash
 ~/projects/devsecops-platform
 ```
+
+###
 
 **Avoid**:
 
@@ -117,20 +126,20 @@ This project was an intensive exercise in system integration and debugging. Key 
 ## Table of Contents
 
 - [Project: Production-Grade DevSecOps Platform, AWS Ready.](#project-production-grade-devsecops-platform-aws-ready)
+  - [About Repository](#about-repository)
+- [Project Overview](#project-overview)
   - [One-Command Automated DevSecOps Platform](#one-command-automated-devsecops-platform)
     - [Clone the repository](#clone-the-repository)
-    - [](#)
     - [Run the setup script](#run-the-setup-script)
       - [_Note: Automatic TLS Certificate Generation_](#note-automatic-tls-certificate-generation)
-- [Project Overview](#project-overview)
-  - [PROJECT: V2.0 - Feb 15, 2026](#project-v20---feb-15-2026)
-  - [Secure Software Supply Chain Flow of V2](#secure-software-supply-chain-flow-of-v2)
-  - [PROJECT: V1.0 - Oct 18, 2025](#project-v10---oct-18-2025)
-  - [Supply Chain Flow of V1](#supply-chain-flow-of-v1)
+    - [PROJECT: V2.0 - Feb 15, 2026](#project-v20---feb-15-2026)
+    - [Secure Software Supply Chain Flow of V2](#secure-software-supply-chain-flow-of-v2)
+    - [PROJECT: V1.0 - Oct 18, 2025](#project-v10---oct-18-2025)
+    - [Supply Chain Flow of V1](#supply-chain-flow-of-v1)
   - [Lessons Learned](#lessons-learned)
-    - [_IMPORTANT (WSL USERS)_](#important-wsl-users)
+    - [IMPORTANT (WSL USERS)](#important-wsl-users)
+    - [](#)
   - [Table of Contents](#table-of-contents)
-  - [About Repository](#about-repository)
   - [Core Concepts \& Skills Demonstrated](#core-concepts--skills-demonstrated)
   - [Architecture Diagram](#architecture-diagram)
   - [End-to-End Trust Architecture](#end-to-end-trust-architecture)
@@ -158,18 +167,11 @@ This project was an intensive exercise in system integration and debugging. Key 
     - [Step 6.B: Get the Jenkins Service Account Token](#step-6b-get-the-jenkins-service-account-token)
       - [Step 6.C: Assemble the kubeconfig-jenkins.yaml File](#step-6c-assemble-the-kubeconfig-jenkinsyaml-file)
     - [Step 7: Configure the CI/CD Pipeline](#step-7-configure-the-cicd-pipeline)
+    - [](#-1)
     - [Step 8: Deploy the Monitoring Stack (Optional, but recommended)](#step-8-deploy-the-monitoring-stack-optional-but-recommended)
     - [Step 9: Testing the Pipeline](#step-9-testing-the-pipeline)
     - [Appendix A: Standalone Terraform Demonstration](#appendix-a-standalone-terraform-demonstration)
   - [License](#license)
-
-## About Repository
-
-This repository contains the Infrastructure as Code for a complete, local DevOps ecosystem that simulates a modern, secure software delivery lifecycle. Using Docker Compose, it orchestrates a suite of best-in-class open-source tools to automatically build, test, secure, and deploy a containerized application to a multi-node Kubernetes cluster.
-
-The platform is designed as a hands-on learning environment to master advanced concepts including native TLS, container security, pipeline-as-code, and Infrastructure as Code (IaC).
-
-**Companion Application Repository:** [https://github.com/YogeshT22/sample-flask-app](https://github.com/YogeshT22/sample-flask-app)
 
 **Jump to how to install and run section quickly by if you hate reading!!**: [How to Run This Platform](#how-to-run-this-platform)
 
@@ -601,6 +603,8 @@ Fill in the placeholders using the two pieces of information(CA data and Service
      - Branch Specifier: `\*/main`
    - Click **Save**.
 
+###
+
 2. Configure the **Gitea Webhook**:
 
    - In Gitea, go to your
@@ -623,7 +627,7 @@ Fill in the placeholders using the two pieces of information(CA data and Service
 - Jenkins UI → Manage Jenkins → Plugins
 - Go to Available
 - Search for: Docker Pipeline
-- Install and restart
+- Install and restart Jenkins.
 
 > **Note:** This plugin is different from "Docker Commons Plugin" or "Docker plugin". You need Docker Pipeline, specifically.
 
@@ -666,7 +670,6 @@ This directory demonstrates the core workflow for infrastructure provisioning us
     terraform init
     terraform plan
     terraform apply
-
 ```
 
 - **To Clean Up:** `terraform destroy`
@@ -675,3 +678,5 @@ This directory demonstrates the core workflow for infrastructure provisioning us
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---

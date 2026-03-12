@@ -1,16 +1,14 @@
-![Platform](https://img.shields.io/badge/Platform-Kubernetes-blue)
-![CI/CD](https://img.shields.io/badge/CI/CD-Jenkins-red)
-![Security](https://img.shields.io/badge/Security-Cosign-green)
-![Monitoring](https://img.shields.io/badge/Monitoring-Prometheus-orange)
-![Automation](https://img.shields.io/badge/Automation-Bash-yellow)
+<div align="center">
 
 # Project: Production-Grade DevSecOps Platform, AWS Ready.
+
+![Platform](https://img.shields.io/badge/Platform-Kubernetes-blue) ![CI/CD](https://img.shields.io/badge/CI/CD-Jenkins-red) ![Security](https://img.shields.io/badge/Security-Cosign-green) ![Monitoring](https://img.shields.io/badge/Monitoring-Prometheus-orange) ![Automation](https://img.shields.io/badge/Automation-Bash-yellow)
 
 ![logo](assets/logo.png)
 
 ## One-Command Automated DevSecOps Platform
 
-- Implemented a fully automated DevSecOps platform that provisions infrastructure, configures K8s, deploys monitoring, and verifies system health using a single bootstrap command.
+Implemented a fully automated DevSecOps platform that provisions infrastructure, configures K8s, deploys monitoring, and verifies system health using a single bootstrap command.
 
 ### Clone the repository
 
@@ -18,6 +16,10 @@
 git clone https://github.com/YOUR_USERNAME/big-project-2-cicd-pipeline.git
 cd big-project-2-cicd-pipeline
 ```
+
+###
+
+</div>
 
 ### Run the setup script
 
@@ -117,15 +119,16 @@ This project was an intensive exercise in system integration and debugging. Key 
 - [Project: Production-Grade DevSecOps Platform, AWS Ready.](#project-production-grade-devsecops-platform-aws-ready)
   - [One-Command Automated DevSecOps Platform](#one-command-automated-devsecops-platform)
     - [Clone the repository](#clone-the-repository)
+    - [](#)
     - [Run the setup script](#run-the-setup-script)
       - [_Note: Automatic TLS Certificate Generation_](#note-automatic-tls-certificate-generation)
 - [Project Overview](#project-overview)
-    - [PROJECT: V2.0 - Feb 15, 2026](#project-v20---feb-15-2026)
-    - [Secure Software Supply Chain Flow of V2](#secure-software-supply-chain-flow-of-v2)
-    - [PROJECT: V1.0 - Oct 18, 2025](#project-v10---oct-18-2025)
-    - [Supply Chain Flow of V1](#supply-chain-flow-of-v1)
+  - [PROJECT: V2.0 - Feb 15, 2026](#project-v20---feb-15-2026)
+  - [Secure Software Supply Chain Flow of V2](#secure-software-supply-chain-flow-of-v2)
+  - [PROJECT: V1.0 - Oct 18, 2025](#project-v10---oct-18-2025)
+  - [Supply Chain Flow of V1](#supply-chain-flow-of-v1)
   - [Lessons Learned](#lessons-learned)
-      - [_IMPORTANT (WSL USERS)_](#important-wsl-users)
+    - [_IMPORTANT (WSL USERS)_](#important-wsl-users)
   - [Table of Contents](#table-of-contents)
   - [About Repository](#about-repository)
   - [Core Concepts \& Skills Demonstrated](#core-concepts--skills-demonstrated)

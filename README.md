@@ -1,6 +1,6 @@
 <div align="center">
 
-# Project: Production-Grade DevSecOps Platform, AWS Ready.
+# Project: Production-Grade DevSecOps Platform.
 
 ![Platform](https://img.shields.io/badge/Platform-Kubernetes-blue) ![CI/CD](https://img.shields.io/badge/CI/CD-Jenkins-red) ![Security](https://img.shields.io/badge/Security-Cosign-green) ![Monitoring](https://img.shields.io/badge/Monitoring-Prometheus-orange) ![Automation](https://img.shields.io/badge/Automation-Bash-yellow)
 
@@ -125,7 +125,7 @@ debugging. Key takeaways include:
 
 ## Table of Contents
 
-- [Project: Production-Grade DevSecOps Platform, AWS Ready.](#project-production-grade-devsecops-platform-aws-ready)
+- [Project: Production-Grade DevSecOps Platform.](#project-production-grade-devsecops-platform)
   - [About Repository](#about-repository)
 - [Project Overview](#project-overview)
   - [One-Command Automated DevSecOps Platform](#one-command-automated-devsecops-platform)

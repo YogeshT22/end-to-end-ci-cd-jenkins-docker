@@ -125,8 +125,17 @@ for f in "$DEPLOYMENT_FILE" "$SERVICE_FILE" "$INGRESS_FILE"; do
     fi
 done
 
-KUBECONFIG="$OUTPUT_KUBECONFIG" kubectl apply -f "$DEPLOYMENT_FILE" || true
-KUBECONFIG="$OUTPUT_KUBECONFIG" kubectl apply -f "$SERVICE_FILE"    || true
-KUBECONFIG="$OUTPUT_KUBECONFIG" kubectl apply -f "$INGRESS_FILE"    || true
+# The generated kubeconfig is for Jenkins (uses internal Docker DNS: k3d-devops-cluster-serverlb)
+# Since this script runs on the host, we must use k3d's host-mapped kubeconfig to apply manifests.
+TMP_KUBECONFIG=$(mktemp)
+k3d kubeconfig get "$CLUSTER_NAME" > "$TMP_KUBECONFIG"
+
+echo "[INFO] Applying manifests using host-reachable k3d kubeconfig..."
+
+KUBECONFIG="$TMP_KUBECONFIG" kubectl apply -f "$DEPLOYMENT_FILE"
+KUBECONFIG="$TMP_KUBECONFIG" kubectl apply -f "$SERVICE_FILE"
+KUBECONFIG="$TMP_KUBECONFIG" kubectl apply -f "$INGRESS_FILE"
+
+rm -f "$TMP_KUBECONFIG"
 
 echo "[OK] App manifests applied (deployment/service/ingress)"

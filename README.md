@@ -1,4 +1,4 @@
-# Project: Production-Grade DevSecOps Platform.
+# Project: Production-Grade DevSecOps Platform + K6 Load Testing.
 
 ![Platform](https://img.shields.io/badge/Platform-Kubernetes-blue) ![CI/CD](https://img.shields.io/badge/CI/CD-Jenkins-red) ![Security](https://img.shields.io/badge/Security-Cosign-green) ![Monitoring](https://img.shields.io/badge/Monitoring-Prometheus-orange) ![Automation](https://img.shields.io/badge/Automation-Bash-yellow)
 
@@ -17,6 +17,7 @@ The platform is designed as a hands-on learning environment to master advanced c
 # Project Overview
 
 This platform demonstrates real-world DevOps engineering practices including:
+
 - Infrastructure automation
 - Kubernetes cluster lifecycle management
 - Secure software supply chain (Trivy, SBOM, Cosign)
@@ -24,8 +25,10 @@ This platform demonstrates real-world DevOps engineering practices including:
 - CI/CD pipeline automation with Jenkins
 - Monitoring and observability using Prometheus and Grafana
 - Idempotent bootstrap architecture
+- K6 load testing integrated into the pipeline
 
 ## Production-style Supply Chain & CI/CD Flow
+
 This project implements a "Security First" zero-trust pipeline. Every commit pushes through the following automated phases:
 
 1. **Source & Trigger:** Developer pushes to Gitea → Webhook triggers Jenkins.
@@ -35,16 +38,18 @@ This project implements a "Security First" zero-trust pipeline. Every commit pus
 5. **Cryptographic Trust:** The image is signed using `Cosign`.
 6. **Secure Artifact Storage:** Pushed to a private local Docker Registry authenticated via locally trusted TLS (`mkcert`).
 7. **Immutable Deployment:** Kubernetes pulls the signed image and deploys it using its immutable SHA256 digest.
+8. **In-Cluster Load Testing:** Jenkins runs k6 tests against the deployed service and archives results.
 
 ## Lessons Learned
 
-> This project was an intensive exercise in system integration and debugging. 
+> This project was an intensive exercise in system integration and debugging.
 
 Key takeaways include:
 
 - **Immutability of Infrastructure:** When a local cluster becomes "poisoned" with bad networking or security configs, it is faster and more reliable to delete and recreate it than to patch it.
 - **Explicit Trust is Mandatory:** In a private, secure environment, "automatic" trust doesn't exist. Every communication hop (Jenkins -> Registry -> K8s) requires explicit certificate injection and verification.
 - **Pathing and Quoting in WSL:** Windows file paths with spaces require strict quoting to prevent tools like `k3s` from failing to find volumes.
+- **Iterative Development:** Building a complex platform like this requires iterative development and testing of each component in isolation before integrating them into the full pipeline.
 
 ### IMPORTANT (WSL USERS)
 
@@ -61,14 +66,16 @@ Key takeaways include:
 **Avoid**:
 
 ```bash
- /mnt/c/Users/.../Downloads/devsecops-platform 
- ```
+ /mnt/c/Users/.../Downloads/devsecops-platform
+```
 
 - This avoids filesystem permission issues caused by Windows mounts.
+- If you must run from a Windows path, ensure all paths in the scripts are properly quoted to handle spaces and special characters.
 
 ---
 
 ## Table of Contents
+
 - [Project Overview](#project-overview)
 - [Production-Grade Supply Chain & CI/CD Flow](#-production-grade-supply-chain--cicd-flow)
 - [Lessons Learned](#lessons-learned)
@@ -92,6 +99,7 @@ Key takeaways include:
   - **SBOM Generation:** Created a CycloneDX Software Bill of Materials for every build.
   - **Image Integrity:** Used **Cosign** to cryptographically sign and verify container images, ensuring they are not tampered with between build and deployment.
 - **Observability & Monitoring:** Deployed **Prometheus** and **Grafana** using a **Helm** chart to collect and visualize real-time metrics.
+- **In-Cluster Load Testing:** Integrated **k6** load testing into the pipeline, running tests from within Kubernetes to validate the deployed service under realistic conditions.
 
 ## Architecture Diagram
 
@@ -142,12 +150,15 @@ This ensures:
 | Prometheus       | Metrics collection                             |
 | Grafana          | Metrics visualization                          |
 | mkcert           | Local certificate authority                    |
+| k6               | In-cluster load testing                        |
 
 ## Network Architecture
 
 All services run inside an isolated Docker bridge network:
 
 big-project-2-cicd-pipeline_cicd-net
+
+_name can be changed in `docker-compose.yml` if needed._
 
 This allows secure internal communication using container DNS names:
 
@@ -193,7 +204,9 @@ This prevents:
 ## 🛠️ Quick Start (How to Run Platform)
 
 ### 1. Provision the Infrastructure
+
 The entire platform is provisioned using idempotent automation scripts.
+
 ```bash
 git clone https://github.com/YogeshT22/big-project-2-cicd-pipeline.git
 cd big-project-2-cicd-pipeline
@@ -203,6 +216,7 @@ cd big-project-2-cicd-pipeline
 ```
 
 ### 2. Generate Cosign Keys (Image Signing)
+
 This pipeline uses **Cosign** to cryptographically sign container images. You need to generate a key pair before running the pipeline:
 
 ```bash
@@ -210,15 +224,18 @@ This pipeline uses **Cosign** to cryptographically sign container images. You ne
 # Generate a new key pair (Press Enter to leave password blank for automation)
 cosign generate-key-pair
 ```
+
 This generates two files:
+
 1. `cosign.pub`: The public key. Move this into your application repository (`sample-flask-app/cosign.pub`).
 2. `cosign.key`: The private key. **Do not commit this.** Upload this file to your Jenkins Credentials store as a **Secret File** with the ID exactly matching: `cosign-private-key`.
 
 ### 3. Final Web UI Configurations (One-Time Setup)
+
 Because Gitea and Jenkins run locally inside Docker, you must configure their initial UI connections once:
 
 1. **Gitea:** Go to `http://localhost:8081` and finish the installation using standard SQLite. Create a user and an empty repository named `sample-flask-app`.
-2. **Jenkins:** Go to `http://localhost:8080` (get the initial password via `docker logs jenkins-server`). 
+2. **Jenkins:** Go to `http://localhost:8080` (get the initial password via `docker logs jenkins-server`).
    - Install the **Docker Pipeline** plugin.
    - Go to Manage Jenkins -> Credentials and add three **Secret File** credentials:
      - ID: `kubeconfig-sa` (Upload the `kubeconfig-jenkins.yaml` generated by the bootstrap script).
@@ -236,15 +253,15 @@ Each script has a single responsibility and is safe to rerun (idempotent).
 
 | Script                     | Purpose                                              |
 | -------------------------- | ---------------------------------------------------- |
-| 01-start-infrastructure.sh | Starts Docker services   |
-| 02-wait-for-services.sh    | Waits until Gitea, Jenkins, and Registry are ready                        |
-| 03-create-cluster.sh       | Creates or recovers Kubernetes cluster                      |
-| 04-configure-kubernetes.sh | Configures Kubernetes service account and kubeconfig                   |
-| 05-deploy-monitoring.sh    | Deploys Prometheus and Grafana using Helm                         |
-| 06-verify-platform.sh      | Verifies full platform functionality                |
-| stop-platform.sh           | Safely stops platform infrastructure               |
-| bootstrap.sh               | Orchestrates full platform provisioning                 |
-| generate-certs.sh         | Generate CA root and registry certificates.               |
+| 01-start-infrastructure.sh | Starts Docker services                               |
+| 02-wait-for-services.sh    | Waits until Gitea, Jenkins, and Registry are ready   |
+| 03-create-cluster.sh       | Creates or recovers Kubernetes cluster               |
+| 04-configure-kubernetes.sh | Configures Kubernetes service account and kubeconfig |
+| 05-deploy-monitoring.sh    | Deploys Prometheus and Grafana using Helm            |
+| 06-verify-platform.sh      | Verifies full platform functionality                 |
+| stop-platform.sh           | Safely stops platform infrastructure                 |
+| bootstrap.sh               | Orchestrates full platform provisioning              |
+| generate-certs.sh          | Generate CA root and registry certificates.          |
 
 ---
 

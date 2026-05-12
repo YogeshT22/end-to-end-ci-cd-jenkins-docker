@@ -1,8 +1,7 @@
-# Project: Production-Grade DevSecOps Platform + K6 Load Testing.
+# Production-Grade DevSecOps Platform + K6 Load Testing.
 
 ![Platform](https://img.shields.io/badge/Platform-Kubernetes-blue) ![CI/CD](https://img.shields.io/badge/CI/CD-Jenkins-red) ![Security](https://img.shields.io/badge/Security-Cosign-green) ![Monitoring](https://img.shields.io/badge/Monitoring-Prometheus-orange) ![Automation](https://img.shields.io/badge/Automation-Bash-yellow)
 
-![logo](assets/logo.png)
 
 ## About Repository
 
@@ -68,7 +67,7 @@ Key takeaways include:
 ```bash
  /mnt/c/Users/.../Downloads/devsecops-platform
 ```
-
+###
 - This avoids filesystem permission issues caused by Windows mounts.
 - If you must run from a Windows path, ensure all paths in the scripts are properly quoted to handle spaces and special characters.
 
@@ -87,6 +86,7 @@ Key takeaways include:
 ## Core Concepts & Skills Demonstrated
 
 - **DevSecOps Pipeline Design:** Implemented a full, multi-stage pipeline with a "Security First" approach:
+  
   - `Git Push -> Webhook -> Secret Scan -> Build -> Image Scan -> SBOM Generation -> Image Signing & Verification -> Deploy`
 - **Infrastructure Automation:**
   - **Docker Compose:** Used for orchestration of the core CI/CD toolchain.
@@ -102,10 +102,66 @@ Key takeaways include:
 - **In-Cluster Load Testing:** Integrated **k6** load testing into the pipeline, running tests from within Kubernetes to validate the deployed service under realistic conditions.
 
 ## Architecture Diagram
+```mermaid
+flowchart TD
 
-![Architecture Diagram](assets/arch.png)
+    subgraph SCM
+        DEV[Developer]
+        GITEA[Gitea]
+    end
 
-## End-to-End Trust Architecture
+    subgraph CICD["CI/CD + Security Pipeline"]
+        JENKINS[Jenkins]
+        TRIVY1[Trivy Secret Scan]
+        BUILD[Docker Build]
+        TRIVY2[Trivy Image Scan]
+        SBOM[SBOM Generation]
+        COSIGN[Cosign Signing]
+    end
+
+    subgraph REG["Secure Registry"]
+        REGISTRY[Private Docker Registry]
+        MKCERT[mkcert Root CA]
+    end
+
+    subgraph K8S["Kubernetes Cluster"]
+        K3S[K3s Cluster]
+        APP[Flask App Deployment]
+        K6[k6 Load Testing]
+    end
+
+    subgraph OBS["Observability"]
+        PROM[Prometheus]
+        GRAFANA[Grafana]
+    end
+
+    DEV -->|git push| GITEA
+    GITEA -->|webhook| JENKINS
+
+    JENKINS --> TRIVY1
+    TRIVY1 --> BUILD
+    BUILD --> TRIVY2
+    TRIVY2 --> SBOM
+    SBOM --> COSIGN
+
+    COSIGN --> REGISTRY
+
+    MKCERT --> REGISTRY
+    MKCERT --> JENKINS
+    MKCERT --> K3S
+
+    REGISTRY -->|signed image| K3S
+
+    K3S --> APP
+
+    JENKINS --> K6
+    K6 --> APP
+
+    K3S --> PROM
+    PROM --> GRAFANA
+```
+
+### End-to-End Trust Architecture
 
 This platform implements a complete cryptographic trust chain across the software supply chain:
 
@@ -136,6 +192,7 @@ This ensures:
 - Registry authenticity
 - Deployment integrity
 - End-to-end supply chain security
+
 
 ## Component Responsibilities
 
